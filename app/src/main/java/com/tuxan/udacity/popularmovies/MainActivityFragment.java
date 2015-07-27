@@ -82,8 +82,7 @@ public class MainActivityFragment extends Fragment {
         String sortBy = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_value_popularity));
 
         // add API Key value to resource string values
-        new TheMovieDBService(getString(R.string.api_key))
-                .getAPI()
+        TMDbServiceFactory.createService(getString(R.string.api_key))
                 .discover(sortBy)
                 .subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
