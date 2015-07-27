@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- action bar colors -->
+    <color name="pm_primary">#009688</color>
+    <color name="pm_primary_dark">#ff005d4f</color>
+
+    <!-- Grid colors -->
+    <color name="pm_grid_title_background">#CC000000</color>
+    <color name="pm_grid_title_text">#FFFFFFFF</color>
+</resources>

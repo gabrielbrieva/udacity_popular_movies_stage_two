@@ -1,0 +1,30 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/pm_primary</item>
+        <item name="colorPrimaryDark">@color/pm_primary_dark</item>
+    </style>
+
+    <style name="MovieGridTitle" parent="TextAppearance.AppCompat.Small">
+        <item name="android:textColor">@color/pm_grid_title_text</item>
+        <item name="android:background">@color/pm_grid_title_background</item>
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <!-- Main activity theme. -->
+    <style name="MoviesGridTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/ActionBar.Solid.PopularMovies.NoTitle</item>
+    </style>
+
+    <!-- Settings activity theme. -->
+    <style name="SettingsTheme" parent="AppTheme">
+    </style>
+
+    <!-- main activity action bar styles -->
+    <style name="ActionBar.Solid.PopularMovies.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@mipmap/ic_launcher</item>
+    </style>
+
+</resources>
