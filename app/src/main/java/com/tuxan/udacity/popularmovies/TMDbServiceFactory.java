@@ -43,7 +43,7 @@ public class TMDbServiceFactory {
                         request.addQueryParam("api_key", apiKey);
                     }
                 })
-                //.setLogLevel(RestAdapter.LogLevel.FULL) // only by debugging purpose
+                .setLogLevel(RestAdapter.LogLevel.FULL) // only by debugging purpose
                 .build()
                 .create(TMDbService.class);
     }

@@ -26,21 +26,20 @@ import rx.schedulers.Schedulers;
 /**
  * A fragment with a grid of poster movies.
  */
-public class MainActivityFragment extends Fragment {
+public class MoviesFragment extends Fragment {
 
+    // Custom ArrayAdapter<Movie> to show each movies on a GridView
     private MoviesAdapter mAdapter;
-
-    public MainActivityFragment() {
-
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHasOptionsMenu(true);
+        //setHasOptionsMenu(true); // debug purpose
     }
 
+    /*
+    // debug purpose
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main_fragment_refresh, menu);
@@ -57,17 +56,19 @@ public class MainActivityFragment extends Fragment {
         }
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
     @Override
     public void onStart() {
         super.onStart();
+
+        // we load the list of movies
         loadMovies();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_movies, container, false);
 
         mAdapter = new MoviesAdapter(getActivity(), R.layout.movie_poster, new ArrayList<Movie>());
 
@@ -77,11 +78,18 @@ public class MainActivityFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Load list of movies on MoviesAdapter property
+     */
     private void loadMovies() {
+        // the first load we use the preference sort value
+        // TODO: only on the first load
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String sortBy = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_value_popularity));
 
-        // add API Key value to resource string values
+        // we get a TMDbService instance and we configure the tx.Observable<DiscoverResult>
+        // to execute the callback on the main thread to refresh the UI with movies
+        // result.
         TMDbServiceFactory.createService(getString(R.string.api_key))
                 .discover(sortBy)
                 .subscribeOn(Schedulers.newThread())
@@ -99,10 +107,13 @@ public class MainActivityFragment extends Fragment {
 
                     @Override
                     public void onNext(DiscoverResult response) {
+                        // we clear the MovieAdapter
                         mAdapter.clear();
 
-                        if (response != null && response.results != null && !response.results.isEmpty())
+                        if (response != null && response.results != null && !response.results.isEmpty()) {
+                            // we use the addAll method to avoid the consecutive notifyDataSetChanged invoke
                             mAdapter.addAll(response.results);
+                        }
                     }
                 });
     }
