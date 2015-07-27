@@ -3,7 +3,7 @@ package com.tuxan.udacity.popularmovies.model;
 import java.util.Date;
 
 /**
- * Movie model for deserialization from themoviedb API response
+ * Movie pojo for deserialization from TMDb API response
  */
 public class Movie {
 
