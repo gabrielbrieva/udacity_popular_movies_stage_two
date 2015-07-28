@@ -5,4 +5,6 @@
     android:layout_height="match_parent"
     android:numColumns="@integer/video_grid_num_columns"
     android:verticalSpacing="0dp"
-    android:horizontalSpacing="0dp" />
+    android:horizontalSpacing="0dp"
+    android:drawSelectorOnTop="true"
+    android:listSelector="@drawable/poster_select"/>

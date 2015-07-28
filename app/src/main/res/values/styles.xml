@@ -4,6 +4,7 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/pm_primary</item>
         <item name="colorPrimaryDark">@color/pm_primary_dark</item>
+        <item name="colorAccent">@color/pm_accent</item>
     </style>
 
     <style name="MovieGridTitle" parent="TextAppearance.AppCompat.Small">
