@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,7 +25,6 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-
 /**
  * A fragment with a grid of poster movies.
  */
@@ -34,6 +32,8 @@ public class MoviesFragment extends Fragment {
 
     // Custom ArrayAdapter<Movie> to show each movies on a GridView
     private MoviesAdapter mAdapter;
+
+    // Custom ArrayAdapter<Movie> to show each sort options on a spinner
     private SpinnerSortAdapter mSpinnerAdapter;
 
     private String mSortValue = null;
@@ -99,7 +99,7 @@ public class MoviesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies, container, false);
 
-        mSpinnerAdapter = new SpinnerSortAdapter(((AppCompatActivity)getActivity()).getSupportActionBar().getThemedContext(), R.layout.spinner_item_dropdown);
+        mSpinnerAdapter = new SpinnerSortAdapter(getActivity(), R.layout.spinner_item_dropdown);
 
         if (mSortValue == null) {
             // the first load we use the preference sort value

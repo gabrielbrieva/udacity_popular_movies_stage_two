@@ -1,27 +1,27 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/pm_primary</item>
         <item name="colorPrimaryDark">@color/pm_primary_dark</item>
         <item name="colorAccent">@color/pm_accent</item>
     </style>
 
+    <!-- Settings activity theme -->
+    <style name="SettingsTheme" parent="AppTheme">
+        <item name="actionBarStyle">@style/PopularMoviesActionBar</item>
+    </style>
+
+    <style name="PopularMoviesActionBar" parent="Widget.AppCompat.ActionBar.Solid">
+        <item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@mipmap/ic_launcher</item>
+    </style>
+
+    <!-- Movies Grid themes -->
     <style name="MovieGridTitle" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">@color/pm_grid_title_text</item>
         <item name="android:background">@color/pm_grid_title_background</item>
         <item name="android:padding">4dp</item>
-    </style>
-
-    <!-- Settings activity theme. -->
-    <style name="SettingsTheme" parent="AppTheme">
-        <item name="actionBarStyle">@style/ActionBar.Solid.PopularMovies.NoTitle</item>
-    </style>
-
-    <!-- main activity action bar styles -->
-    <style name="ActionBar.Solid.PopularMovies.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="displayOptions">useLogo|showHome</item>
-        <item name="logo">@mipmap/ic_launcher</item>
     </style>
 
 </resources>
