@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.tuxan.udacity.popularmovies.model.DiscoverResult;
@@ -49,7 +49,7 @@ public class MoviesFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.movie_fragment, menu);
 
-        Spinner spinner = (Spinner) menu.findItem(R.id.action_sort).getActionView();
+        AppCompatSpinner spinner = (AppCompatSpinner) menu.findItem(R.id.action_sort).getActionView();
         spinner.setAdapter(mSpinnerAdapter);
 
         if (getString(R.string.pref_sort_value_popularity).equals(mSortValue))
