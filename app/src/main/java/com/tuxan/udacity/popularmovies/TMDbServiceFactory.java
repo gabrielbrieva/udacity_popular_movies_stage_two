@@ -1,10 +1,12 @@
 package com.tuxan.udacity.popularmovies;
 
 import com.tuxan.udacity.popularmovies.model.DiscoverResult;
+import com.tuxan.udacity.popularmovies.model.Movie;
 
 import retrofit.RequestInterceptor;
 import retrofit.RestAdapter;
 import retrofit.http.GET;
+import retrofit.http.Path;
 import retrofit.http.Query;
 import rx.Observable;
 
@@ -59,7 +61,8 @@ public class TMDbServiceFactory {
         @GET("/discover/movie")
         Observable<DiscoverResult> discover(@Query("sort_by") String sortBy);
 
-        // Add others API request method :)
+        @GET("/movie/{id}")
+        Observable<Movie> movieDetail(@Path("id") String movieId);
 
     }
 

@@ -39,11 +39,11 @@ public class MoviesAdapter extends ArrayAdapter<Movie> {
         // we set the title to TextView
         final TextView title = (TextView) convertView.findViewById(R.id.tv_movie_title);
         title.setVisibility(View.GONE);
-        title.setText(movie.original_title);
+        title.setText(movie.getOriginal_title());
 
         ImageView poster = (ImageView) convertView.findViewById(R.id.iv_movie_poster);
 
-        if (movie.poster_path != null) {
+        if (movie.getPoster_path() != null) {
 
             // create an instance of Picasso using the context
             Picasso p = Picasso.with(getContext());
@@ -52,7 +52,7 @@ public class MoviesAdapter extends ArrayAdapter<Movie> {
             p.setLoggingEnabled(true);
 
             // load the poster image
-            p.load(IMG_ROOT_PATH + movie.poster_path)
+            p.load(IMG_ROOT_PATH + movie.getPoster_path())
                     // if the image don't exist we use a default drawable
                     .error(R.drawable.poster_missing)
                     .resize(DEFAULT_IMG_WIDTH, DEFAULT_IMG_HEIGHT)

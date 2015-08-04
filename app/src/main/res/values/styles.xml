@@ -1,10 +1,12 @@
 <resources>
 
     <!-- Base application theme -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/pm_primary</item>
         <item name="colorPrimaryDark">@color/pm_primary_dark</item>
         <item name="colorAccent">@color/pm_accent</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
 
     <!-- Settings activity theme -->

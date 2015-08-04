@@ -1,14 +1,11 @@
 package com.tuxan.udacity.popularmovies;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatSpinner;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -17,7 +14,6 @@ import android.widget.Toast;
 
 import com.tuxan.udacity.popularmovies.model.DiscoverResult;
 import com.tuxan.udacity.popularmovies.model.Movie;
-import com.tuxan.udacity.popularmovies.model.SortValuePair;
 
 import java.util.ArrayList;
 
@@ -33,58 +29,11 @@ public class MoviesFragment extends Fragment {
     // Custom ArrayAdapter<Movie> to show each movies on a GridView
     private MoviesAdapter mAdapter;
 
-    // Custom ArrayAdapter<Movie> to show each sort options on a spinner
-    private SpinnerSortAdapter mSpinnerAdapter;
-
     private String mSortValue = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
-
-    // debug purpose
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.movie_fragment, menu);
-
-        AppCompatSpinner spinner = (AppCompatSpinner) menu.findItem(R.id.action_sort).getActionView();
-        spinner.setAdapter(mSpinnerAdapter);
-
-        if (getString(R.string.pref_sort_value_popularity).equals(mSortValue))
-            spinner.setSelection(0);
-        else if (getString(R.string.pref_sort_value_rate).equals(mSortValue))
-            spinner.setSelection(1);
-
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                SortValuePair val = mSpinnerAdapter.getItem(position);
-
-                if (!val.getKey().equals(mSortValue)) {
-                    mSortValue = val.getKey();
-                    loadMovies();
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_refresh) {
-            loadMovies();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -99,8 +48,6 @@ public class MoviesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_movies, container, false);
 
-        mSpinnerAdapter = new SpinnerSortAdapter(getActivity(), R.layout.spinner_item_dropdown);
-
         if (mSortValue == null) {
             // the first load we use the preference sort value
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -112,6 +59,15 @@ public class MoviesFragment extends Fragment {
         GridView gv = (GridView) view.findViewById(R.id.gvMovies);
         gv.setAdapter(mAdapter);
 
+        gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), DetailActivity.class);
+                intent.putExtra("movie", mAdapter.getItem(position));
+                startActivity(intent);
+            }
+        });
+
         return view;
     }
 
@@ -119,6 +75,8 @@ public class MoviesFragment extends Fragment {
      * Load list of movies in MoviesAdapter property
      */
     private void loadMovies() {
+
+        // TODO: check internet connection first
 
         // we get a TMDbService instance and we configure the tx.Observable<DiscoverResult>
         // to execute the callback on the main thread to refresh the UI with movies
