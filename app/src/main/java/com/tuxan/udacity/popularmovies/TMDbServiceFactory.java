@@ -62,7 +62,7 @@ public class TMDbServiceFactory {
         Observable<DiscoverResult> discover(@Query("sort_by") String sortBy);
 
         @GET("/movie/{id}")
-        Observable<Movie> movieDetail(@Path("id") String movieId);
+        Observable<Movie> movieDetail(@Path("id") int movieId);
 
     }
 

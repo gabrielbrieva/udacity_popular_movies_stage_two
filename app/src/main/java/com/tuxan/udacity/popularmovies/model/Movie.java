@@ -16,7 +16,7 @@ public class Movie implements Serializable{
     private String original_title;
     private String overview;
     private String vote_average;
-    private Date date;
+    private String release_date;
 
     public int getId() {
         return id;
@@ -66,11 +66,11 @@ public class Movie implements Serializable{
         this.vote_average = vote_average;
     }
 
-    public Date getDate() {
-        return date;
+    public String getRelease_date() {
+        return release_date;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setRelease_date(String release_date) {
+        this.release_date = release_date;
     }
 }
