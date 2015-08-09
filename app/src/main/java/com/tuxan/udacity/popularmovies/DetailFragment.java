@@ -15,16 +15,13 @@ import com.tuxan.udacity.popularmovies.model.Movie;
 public class DetailFragment extends Fragment {
 
     Movie movie;
-    // path for load poster image
-    private static final String IMG_ROOT_PATH = "http://image.tmdb.org/t/p/w185";
-    private static final String MOVIE_STATE_KEY = "movie";
 
     public DetailFragment() {
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable(MOVIE_STATE_KEY, movie);
+        outState.putSerializable(Utils.MOVIE_DETAIL_KEY, movie);
         super.onSaveInstanceState(outState);
     }
 
@@ -33,8 +30,8 @@ public class DetailFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         Intent intent = getActivity().getIntent();
-        if (intent != null && intent.hasExtra("movie")) {
-            movie = (Movie) intent.getSerializableExtra("movie");
+        if (intent != null && intent.hasExtra(Utils.MOVIE_DETAIL_KEY)) {
+            movie = (Movie) intent.getSerializableExtra(Utils.MOVIE_DETAIL_KEY);
         }
     }
 
@@ -42,8 +39,14 @@ public class DetailFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        if (savedInstanceState != null && movie == null) {
-            movie = (Movie) savedInstanceState.getSerializable(MOVIE_STATE_KEY);
+        if (savedInstanceState != null && movie == null && savedInstanceState.containsKey(Utils.MOVIE_DETAIL_KEY)) {
+            movie = (Movie) savedInstanceState.getSerializable(Utils.MOVIE_DETAIL_KEY);
+        }
+
+        if (movie == null) {
+            // TODO: Show error getting movie data ...
+
+            return view;
         }
 
         TextView tv = (TextView) view.findViewById(R.id.tvOriginalTitle);
@@ -53,10 +56,10 @@ public class DetailFragment extends Fragment {
         tv.setText(movie.getOverview());
 
         tv = (TextView) view.findViewById(R.id.tvDateRelease);
-        tv.setText("Release Date: " + movie.getRelease_date());
+        tv.setText(getString(R.string.movie_detail_release_date) + ": " + movie.getRelease_date());
 
         tv = (TextView) view.findViewById(R.id.tvVoteAverage);
-        tv.setText("Rating: " + movie.getVote_average());
+        tv.setText(getString(R.string.movie_detail_rating) + ": " + movie.getVote_average());
 
         final ImageView ivPoster = (ImageView) view.findViewById(R.id.ivDetailPoster);
 
@@ -64,10 +67,10 @@ public class DetailFragment extends Fragment {
         Picasso p = Picasso.with(getActivity());
 
         // debugging purpose
-        p.setLoggingEnabled(true);
+        // p.setLoggingEnabled(true);
 
         // load the backdrop image
-        p.load(IMG_ROOT_PATH + movie.getPoster_path())
+        p.load(Utils.IMG_END_POINT + "w185" + movie.getPoster_path())
                 // if the image don't exist we use a default drawable
                 .error(R.drawable.poster_missing)
                 // put the result image in poster ImageView

@@ -15,9 +15,6 @@ import rx.Observable;
  */
 public class TMDbServiceFactory {
 
-    // end point used by API http request
-    private static final String END_POINT_PATH = "http://api.themoviedb.org/3";
-
     /**
      * Creator of TMDbService instance using an API Key as parameter.
      *
@@ -29,7 +26,7 @@ public class TMDbServiceFactory {
         // Using retrofit library we create a RestAdapter
         // based on TMDbService Interface.
         return new RestAdapter.Builder()
-                .setEndpoint(END_POINT_PATH)
+                .setEndpoint(Utils.END_POINT_PATH)
                 .setRequestInterceptor(new RequestInterceptor() {
                     @Override
                     public void intercept(RequestInterceptor.RequestFacade request) {
@@ -45,11 +42,15 @@ public class TMDbServiceFactory {
                         request.addQueryParam("api_key", apiKey);
                     }
                 })
-                .setLogLevel(RestAdapter.LogLevel.FULL) // only by debugging purpose
+                //.setLogLevel(RestAdapter.LogLevel.FULL) // only by debugging purpose
                 .build()
                 .create(TMDbService.class);
     }
 
+    /**
+     * Interface to wrap the TMDb services we will use in the application
+     * ("/discover/movie" and "/movie/{id}").
+     */
     public interface TMDbService {
 
         /**
@@ -61,6 +62,11 @@ public class TMDbServiceFactory {
         @GET("/discover/movie")
         Observable<DiscoverResult> discover(@Query("sort_by") String sortBy);
 
+        /**
+         * Get Movie Detail from TMDb API using a Http Request
+         * @param movieId Movie ID value
+         * @return instance of rx.Observable<Movie>
+         */
         @GET("/movie/{id}")
         Observable<Movie> movieDetail(@Path("id") int movieId);
 

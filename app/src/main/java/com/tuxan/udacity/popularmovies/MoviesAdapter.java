@@ -16,8 +16,6 @@ import java.util.List;
 
 public class MoviesAdapter extends ArrayAdapter<Movie> {
 
-    // path for load poster image
-    private static final String IMG_ROOT_PATH = "http://image.tmdb.org/t/p/w185";
     // default image size, all image result must have the same size
     private static int DEFAULT_IMG_WIDTH = 185;
     private static int DEFAULT_IMG_HEIGHT = 278;
@@ -49,10 +47,10 @@ public class MoviesAdapter extends ArrayAdapter<Movie> {
             Picasso p = Picasso.with(getContext());
 
             // debugging purpose
-            p.setLoggingEnabled(true);
+            //p.setLoggingEnabled(true);
 
             // load the poster image
-            p.load(IMG_ROOT_PATH + movie.getPoster_path())
+            p.load(Utils.IMG_END_POINT + "w185" + movie.getPoster_path())
                     // if the image don't exist we use a default drawable
                     .error(R.drawable.poster_missing)
                     .resize(DEFAULT_IMG_WIDTH, DEFAULT_IMG_HEIGHT)

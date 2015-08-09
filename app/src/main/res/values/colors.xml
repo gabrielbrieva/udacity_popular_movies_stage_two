@@ -4,8 +4,8 @@
     <color name="pm_primary">#009688</color>
     <color name="pm_primary_dark">#ff005d4f</color>
 
-    <!-- Global colors -->
-    <color name="pm_accent">@color/pm_primary</color>
+    <!-- Utils colors -->
+    <color name="pm_accent">#E91E63</color>
     <color name="pm_default_text">#ce000000</color>
 
     <!-- Grid colors -->
