@@ -49,8 +49,6 @@ public class DetailActivity extends AppCompatActivity {
             p.load(Utils.IMG_END_POINT + "w780" + movie.getBackdrop_path())
                     // if the image don't exist we use a default drawable
                     .error(R.drawable.poster_missing)
-                    //.resize(DEFAULT_IMG_WIDTH, DEFAULT_IMG_HEIGHT)
-
                     // put the result image in poster ImageView
                     .into(ivBackdrop);
         }
