@@ -10,9 +10,9 @@ You must add TMDb API Key value as string resource value using name "api_key".
 ScreenShots
 -----------
 
-![Alt text](/screenshots/movies_offline_st1.png?raw=true "Movies")
+![Alt text](/screenshots/movies_offline_st1.png?raw=true "Offline")
 ![Alt text](/screenshots/movies_st1.png?raw=true "Movies")
 ![Alt text](/screenshots/movies_land_st1.png?raw=true "Movies Land")
-![Alt text](/screenshots/movie_detail_st1.png?raw=true "Movies")
+![Alt text](/screenshots/movie_detail_st1.png?raw=true "Detail Movie")
 
-![Alt text](/screenshots/movies_tablet_land_st1.png?raw=true "Detail Movie on Nexus 7")
+![Alt text](/screenshots/movies_tablet_land_st1.png?raw=true "Movies Land on Nexus 7")
