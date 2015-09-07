@@ -9,15 +9,36 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final static String DETAILFRAGMENT_TAG = "MDFTAG";
+
     Toolbar toolbar;
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        if (findViewById(R.id.movie_detail_container) != null) {
+            // two-pane using sw600dp layout
+
+            mTwoPane = true;
+
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.movie_detail_container, new DetailFragment(), DETAILFRAGMENT_TAG)
+                        .commit();
+            }
+
+        } else {
+            mTwoPane = false;
+            //getSupportActionBar().setElevation(0f);
+        }
+
+
     }
 
     @Override
