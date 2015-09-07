@@ -1,5 +1,5 @@
-Udacity Popular Movies Project (Stage 1)
-=========================================
+Udacity Popular Movies (Stage 2)
+================================
 
 You must add TMDb API Key value as string resource value using name "api_key".
 
