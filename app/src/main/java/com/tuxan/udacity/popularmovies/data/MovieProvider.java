@@ -8,8 +8,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 
 public class MovieProvider extends ContentProvider{
+
+    private final String LOG_TAG = MovieProvider.class.getSimpleName();
 
     public static final int MOVIE = 100;
     public static final int MOVIE_DETAIL = 101;
@@ -78,6 +81,9 @@ public class MovieProvider extends ContentProvider{
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+
+        Log.d(LOG_TAG, "Query count result: " + c.getCount());
+
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
     }
@@ -106,6 +112,9 @@ public class MovieProvider extends ContentProvider{
 
         if (match == MOVIE) {
             long id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, values);
+
+            Log.d(LOG_TAG, "Insert Id result: " + id);
+
             if (id > 0)
                 returnUri = MovieContract.MovieEntry.buildMovieUri(id);
             else
@@ -138,6 +147,8 @@ public class MovieProvider extends ContentProvider{
         if (rowsDeleted != 0)
             getContext().getContentResolver().notifyChange(uri, null);
 
+        Log.d(LOG_TAG, "Delete rows result: " + rowsDeleted);
+
         return rowsDeleted;
     }
 
@@ -159,6 +170,8 @@ public class MovieProvider extends ContentProvider{
 
         if (rowsUpdated != 0)
             getContext().getContentResolver().notifyChange(uri, null);
+
+        Log.d(LOG_TAG, "Updated rows result: " + rowsUpdated);
 
         return rowsUpdated;
     }
@@ -187,6 +200,9 @@ public class MovieProvider extends ContentProvider{
             }
 
             getContext().getContentResolver().notifyChange(uri, null);
+
+            Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
+
             return rowsInserted;
         } else {
             return super.bulkInsert(uri, values);

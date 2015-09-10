@@ -15,7 +15,8 @@ public class Movie implements Serializable{
     private String backdrop_path;
     private String original_title;
     private String overview;
-    private String vote_average;
+    private float popularity;
+    private float vote_average;
     private String release_date;
 
     public int getId() {
@@ -58,11 +59,19 @@ public class Movie implements Serializable{
         this.overview = overview;
     }
 
-    public String getVote_average() {
+    public float getPopularity() {
+        return popularity;
+    }
+
+    public void setPopularity(float popularity) {
+        this.popularity = popularity;
+    }
+
+    public float getVote_average() {
         return vote_average;
     }
 
-    public void setVote_average(String vote_average) {
+    public void setVote_average(float vote_average) {
         this.vote_average = vote_average;
     }
 

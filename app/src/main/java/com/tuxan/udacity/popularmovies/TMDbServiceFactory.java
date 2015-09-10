@@ -33,11 +33,6 @@ public class TMDbServiceFactory {
                         // We expect a json response from API
                         request.addHeader("Accept", "application/json");
 
-                        // "vote_average" is not a true measure of votes, a lot of movies have
-                        // high vote_average value but the number of vote are small so the result
-                        // of high vote_average are a unknown movies.
-                        request.addQueryParam("vote_count.gte", "1000"); // get significant result
-
                         // we add API Key value as parameter
                         request.addQueryParam("api_key", apiKey);
                     }
@@ -59,7 +54,7 @@ public class TMDbServiceFactory {
          * @param sortBy R.string.pref_sort_value_popularity or R.string.pref_sort_value_rate
          * @return instance of rx.Observable<DiscoverResult>
          */
-        @GET("/discover/movie")
+        @GET("/discover/movie?vote_count.gte=1000") // get significant result
         Observable<DiscoverResult> discover(@Query("sort_by") String sortBy);
 
         /**
@@ -68,7 +63,7 @@ public class TMDbServiceFactory {
          * @return instance of rx.Observable<Movie>
          */
         @GET("/movie/{id}")
-        Observable<Movie> movieDetail(@Path("id") int movieId);
+        Observable<Movie> movieDetail(@Path("id") long movieId);
 
     }
 

@@ -11,6 +11,8 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
+        <service android:name=".service.SyncMovieService" />
+
         <provider
             android:authorities="@string/content_authority"
             android:name=".data.MovieProvider"
