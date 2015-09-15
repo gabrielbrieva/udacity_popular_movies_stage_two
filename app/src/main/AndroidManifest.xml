@@ -12,6 +12,7 @@
         android:theme="@style/AppTheme" >
 
         <service android:name=".service.SyncMovieService" />
+        <receiver android:name=".service.SyncMovieService$AlarmReceiver" android:enabled="true" />
 
         <provider
             android:authorities="@string/content_authority"

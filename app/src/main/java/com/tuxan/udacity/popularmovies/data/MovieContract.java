@@ -37,17 +37,21 @@ public class MovieContract {
         }
 
         /**
-         * Build a URI to get list of movies filger by a filter type
-         * @param filterBy: "favorites", "watched", "popular" or "highest-rated"
+         * Build a URI to get list of movies filter by a filter type
+         * @param filterBy: FILTER_BY_FAVORITE, FILTER_BY_POPULARITY or FILTER_BY_VOTEAVERAGE
          * @return
          */
         public static Uri buildMoviesUri(String filterBy) {
             return CONTENT_URI.buildUpon().appendPath(filterBy).build();
         }
 
+        // possible values to use with builMoviesUri
+        public static final String FILTER_BY_FAVORITE = "favorite";
+        public static final String FILTER_BY_POPULARITY = "popularity.desc";
+        public static final String FILTER_BY_VOTEAVERAGE = "vote_average.desc";
+
         public static final String TABLE_NAME = "movie";
 
-        //public static final String COLUMN_MOVIE_ID = "movie_id";
         public static final String COLUMN_ORIGINAL_TITLE = "original_title";
         public static final String COLUMN_OVERVIEW = "overview";
         public static final String COLUMN_RELEASE_DATE = "release_date";

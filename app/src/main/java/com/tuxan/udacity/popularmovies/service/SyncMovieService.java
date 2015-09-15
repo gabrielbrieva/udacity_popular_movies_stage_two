@@ -1,7 +1,9 @@
 package com.tuxan.udacity.popularmovies.service;
 
 import android.app.IntentService;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
@@ -14,6 +16,9 @@ import com.tuxan.udacity.popularmovies.model.Movie;
 
 import java.util.Vector;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -31,35 +36,29 @@ public class SyncMovieService extends IntentService {
 
         // checking if the device have internet connection
         if (Utils.isNetworkConnected(this)) {
+            syncByFilter(MovieContract.MovieEntry.FILTER_BY_POPULARITY,
+                    MovieContract.MovieEntry.FILTER_BY_VOTEAVERAGE);
+        }
 
-            Log.d(LOG_TAG, "Requesting to TMDb API");
+    }
+
+    private void syncByFilter(String... filterBy) {
+
+        for(String filter : filterBy) {
+
+            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + filter);
             TMDbServiceFactory.createService(getString(R.string.api_key))
-                    .discover("")
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<DiscoverResult>() {
-
+                    .discover(filter, new Callback<DiscoverResult>() {
                         @Override
-                        public void onCompleted() {
-                        }
+                        public void success(DiscoverResult discover, Response resp) {
 
-                        @Override
-                        public void onError(Throwable e) {
-                            // log an error API request
-                        }
+                            if (discover != null && discover.results != null && !discover.results.isEmpty()) {
 
-                        @Override
-                        public void onNext(DiscoverResult response) {
+                                Log.d(LOG_TAG, "**** Request result size: " + discover.results.size());
 
-                            Log.d(LOG_TAG, "Request result: " + response.toString());
+                                Vector<ContentValues> movies = new Vector<>(discover.results.size());
 
-                            if (response != null && response.results != null && !response.results.isEmpty()) {
-
-                                Log.d(LOG_TAG, "Request result size: " + response.results.size());
-
-                                Vector<ContentValues> movies = new Vector<>(response.results.size());
-
-                                for (Movie m : response.results) {
+                                for (Movie m : discover.results) {
                                     ContentValues values = new ContentValues();
 
                                     values.put(MovieContract.MovieEntry._ID, m.getId());
@@ -81,15 +80,27 @@ public class SyncMovieService extends IntentService {
                                     ContentValues[] cvArray = new ContentValues[movies.size()];
                                     movies.toArray(cvArray);
 
-                                    Log.d(LOG_TAG, "Bulk insert of results Movies...");
+                                    Log.d(LOG_TAG, "**** Bulk insert of results Movies...");
 
+                                    // the bulkInsert method update a row if already exist
                                     getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
                                 }
                             }
                         }
+
+                        @Override
+                        public void failure(RetrofitError error) {
+
+                        }
                     });
-
         }
+    }
 
+    public static class AlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent sendIntent = new Intent(context, SyncMovieService.class);
+            context.startService(sendIntent);
+        }
     }
 }

@@ -23,7 +23,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         style="@style/MovieGridTitle"
-        android:visibility="gone"
         />
 
 </RelativeLayout>

@@ -1,5 +1,8 @@
 package com.tuxan.udacity.popularmovies;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -10,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,10 +26,14 @@ import android.widget.GridView;
 import com.tuxan.udacity.popularmovies.data.MovieContract;
 import com.tuxan.udacity.popularmovies.service.SyncMovieService;
 
+import java.util.Calendar;
+
 /**
  * A fragment with a grid of poster movies.
  */
 public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+
+    private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private static final String SELECTED_KEY = "SELECTED_POSITION";
     private static final String GRID_SCROLL_KEY = "GRID_INDEX";
@@ -71,8 +79,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHasOptionsMenu(true);
-
         /*if (mPDLoading == null)
             mPDLoading = new ProgressDialog(getActivity(), ProgressDialog.STYLE_SPINNER);
 
@@ -87,30 +93,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
         if (savedInstanceState != null && savedInstanceState.containsKey(GRID_SCROLL_KEY))
             mScrollPosition = savedInstanceState.getInt(GRID_SCROLL_KEY);
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.movies, menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_refresh) {
-            updateMovies();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void updateMovies() {
-        Intent intent = new Intent(getActivity(), SyncMovieService.class);
-        // put extras ??
-
-        getActivity().startService(intent);
     }
 
     @Override
@@ -147,7 +129,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         });
 
         if (savedInstanceState != null && savedInstanceState.containsKey(SELECTED_KEY)) {
-            // The listview probably hasn't even been populated yet.  Actually perform the
+            // The gridview probably hasn't even been populated yet.  Actually perform the
             // swapout in onLoadFinished.
             mPosition = savedInstanceState.getInt(SELECTED_KEY);
         }
@@ -173,88 +155,16 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         super.onActivityCreated(savedInstanceState);
     }
 
-    /**
-     * Load list of movies in MoviesAdapter property
-     */
-    /*
-    private void loadMovies() {
-
-        // show loading ProgressDialog
-        mPDLoading.show();
-
-        // checking if the device have internet connection
-        if (Utils.isNetworkConnected(getActivity())) {
-
-            // we get a TMDbService instance and we configure the tx.Observable<DiscoverResult>
-            // to execute the callback on the main thread to refresh the UI with movies
-            // result.
-            TMDbServiceFactory.createService(getString(R.string.api_key))
-                    .discover(sortValue)
-                    .subscribeOn(Schedulers.newThread())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<DiscoverResult>() {
-
-                        @Override
-                        public void onCompleted() {
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            // show an error API request
-                            Toast.makeText(getActivity(), "HTTP API ERROR", Toast.LENGTH_SHORT).show();
-                        }
-
-                        @Override
-                        public void onNext(DiscoverResult response) {
-
-                            if (mGVMovies != null && mGVMovies.getVisibility() == View.GONE)
-                                mGVMovies.setVisibility(View.VISIBLE);
-
-                            if (mLLOffline != null && mLLOffline.getVisibility() == View.VISIBLE)
-                                mLLOffline.setVisibility(View.GONE);
-
-                            // cleaning the MovieAdapter
-                            mAdapter.clear();
-
-                            if (response != null && response.results != null && !response.results.isEmpty()) {
-                                // we use the addAll method to avoid the consecutive notifyDataSetChanged invoke
-                                mAdapter.addAll(response.results);
-
-                                // scrolling to last scroll saved status
-                                mGVMovies.setSelection(mPosition);
-                            }
-
-                            // hide the loading ProgressDialog
-                            if (mPDLoading.isShowing())
-                                mPDLoading.dismiss();
-                        }
-                    });
-        } else {
-
-            // TODO: get from local database (stage 2), by now we show an offline message
-
-            if (mLLOffline != null)
-                mLLOffline.setVisibility(View.VISIBLE);
-
-            if (mGVMovies != null)
-                mGVMovies.setVisibility(View.GONE);
-
-            // hide the loading ProgressDialog
-            if (mPDLoading.isShowing())
-                mPDLoading.dismiss();
-        }
-    }*/
-
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
         String filterBy = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_value_popularity));
 
-        Uri filterMoviesUri = MovieContract.MovieEntry.buildMoviesUri(filterBy);*/
+        Uri filterMoviesUri = MovieContract.MovieEntry.buildMoviesUri(filterBy);
 
         return new CursorLoader(getActivity(),
-                MovieContract.MovieEntry.CONTENT_URI,
+                filterMoviesUri,
                 MOVIES_COLUMNS,
                 null,
                 null,

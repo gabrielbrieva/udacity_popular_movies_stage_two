@@ -10,6 +10,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
+import com.tuxan.udacity.popularmovies.R;
+
 public class MovieProvider extends ContentProvider{
 
     private final String LOG_TAG = MovieProvider.class.getSimpleName();
@@ -46,24 +48,39 @@ public class MovieProvider extends ContentProvider{
             case MOVIE_DETAIL: {
                 c = mDb.getReadableDatabase().query(MovieContract.MovieEntry.TABLE_NAME,
                         projection,
-                        MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID + " = ? ",
-                        new String[] {uri.getLastPathSegment()},
+                        MovieContract.MovieEntry._ID + " = ? ",
+                        new String[] { uri.getLastPathSegment() },
                         null,
                         null,
-                        sortOrder);
+                        null);
                 break;
             }
             // "movie/*"
             case MOVIES: {
+
+                String param = uri.getLastPathSegment();
+                selection = null;
+                String limit = null;
+
+                if (param.equals(MovieContract.MovieEntry.FILTER_BY_FAVORITE)) {
+                    selection = MovieContract.MovieEntry.COLUMN_FAVORITE + " = ? ";
+                    selectionArgs = new String[] { "1" };
+                } else if (param.equals(MovieContract.MovieEntry.FILTER_BY_VOTEAVERAGE)) {
+                    sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC ";
+                    limit = "20";
+                } else if (param.equals(MovieContract.MovieEntry.FILTER_BY_POPULARITY)) {
+                    sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC ";
+                    limit = "20";
+                }
+
                 c = mDb.getReadableDatabase().query(MovieContract.MovieEntry.TABLE_NAME,
                         projection,
-                        //MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = ? ",
-                        //new String[]{uri.getLastPathSegment()},
                         selection,
                         selectionArgs,
                         null,
                         null,
-                        sortOrder);
+                        sortOrder,
+                        limit);
                 break;
             }
             case MOVIE: {
@@ -188,9 +205,32 @@ public class MovieProvider extends ContentProvider{
             try {
 
                 for (ContentValues v : values) {
-                    long id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, v);
-                    if (id != -1)
-                        rowsInserted++;
+
+                    // check if exist
+                    Cursor c = db.query(MovieContract.MovieEntry.TABLE_NAME,
+                            null,
+                            "_id = ?",
+                            new String[]{ v.get(MovieContract.MovieEntry._ID).toString() },
+                            null,
+                            null,
+                            null);
+
+                    long id = -1;
+
+                    if (c.getCount() == 0) {
+                        id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, v);
+                        if (id != -1)
+                            rowsInserted++;
+                    } else {
+                        // if exist we update the row
+                        id = db.update(MovieContract.MovieEntry.TABLE_NAME,
+                                v,
+                                "_id = ?",
+                                new String[] { v.get(MovieContract.MovieEntry._ID).toString() });
+
+                        if (id != -1)
+                            rowsInserted++;
+                    }
                 }
 
                 db.setTransactionSuccessful();
@@ -208,6 +248,7 @@ public class MovieProvider extends ContentProvider{
             return super.bulkInsert(uri, values);
         }
     }
+
 
     // You do not need to call this method. This is a method specifically to assist the testing
     // framework in running smoothly. You can read more at:
