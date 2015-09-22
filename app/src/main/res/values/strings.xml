@@ -25,6 +25,6 @@
     <string name="movie_detail_release_date">Release Date</string>
     <string name="movie_detail_rating">Rating</string>s
 
-    <string name="sync_account_type">popularmovies.udacity.tuxan.com</string>
-    <string name="content_authority">com.tuxan.udacity.popularmovies</string>
+    <string name="sync_account_type">popularmovies.tuxan.com</string>
+    <string name="content_authority">com.tuxan.popularmovies</string>
 </resources>

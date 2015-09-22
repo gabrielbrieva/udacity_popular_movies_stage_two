@@ -8,7 +8,7 @@ import android.provider.BaseColumns;
 public class MovieContract {
 
     // Our content authority for popular movies
-    public static final String CONTENT_AUTHORITY = "com.tuxan.udacity.popularmovies";
+    public static final String CONTENT_AUTHORITY = "com.tuxan.popularmovies";
 
     // Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact
     // the content provider.

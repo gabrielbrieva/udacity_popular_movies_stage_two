@@ -9,7 +9,6 @@ import android.net.NetworkInfo;
  */
 public class Utils {
 
-    public static final String MOVIE_DETAIL_KEY = "MOVIE_DETAIL"; // key used to save state of DetailFragment and pass data from MoviesFragment to DetailActivity and DetailFragment.
     public static final String IMG_END_POINT = "http://image.tmdb.org/t/p/"; // end point used to load movie poster and backdrop images.
     public static final String END_POINT_PATH = "http://api.themoviedb.org/3"; // end point used by API http request.
 

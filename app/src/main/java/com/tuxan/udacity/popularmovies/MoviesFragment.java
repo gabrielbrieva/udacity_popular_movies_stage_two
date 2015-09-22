@@ -1,9 +1,5 @@
 package com.tuxan.udacity.popularmovies;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,20 +9,13 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
 import com.tuxan.udacity.popularmovies.data.MovieContract;
-import com.tuxan.udacity.popularmovies.service.SyncMovieService;
-
-import java.util.Calendar;
 
 /**
  * A fragment with a grid of poster movies.
@@ -70,7 +59,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         /**
          * DetailMovieCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri dateUri);
+        public void onItemSelected(Uri detailUri);
     }
 
     public MoviesFragment() {}
