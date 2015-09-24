@@ -1,7 +1,9 @@
 package com.tuxan.udacity.popularmovies;
 
-import com.tuxan.udacity.popularmovies.model.DiscoverResult;
+import com.tuxan.udacity.popularmovies.model.APIResult;
 import com.tuxan.udacity.popularmovies.model.Movie;
+import com.tuxan.udacity.popularmovies.model.Review;
+import com.tuxan.udacity.popularmovies.model.Trailer;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -55,7 +57,7 @@ public class TMDbServiceFactory {
          * @return instance of rx.Observable<DiscoverResult>
          */
         @GET("/discover/movie?vote_count.gte=1000") // get significant result
-        void discover(@Query("sort_by") String sortBy, Callback<DiscoverResult> callback);
+        void discover(@Query("sort_by") String sortBy, Callback<APIResult<Movie>> callback);
 
         /**
          * Get Movie Detail from TMDb API using a Http Request
@@ -64,6 +66,22 @@ public class TMDbServiceFactory {
          */
         @GET("/movie/{id}")
         void movieDetail(@Path("id") long movieId, Callback<Movie> callback);
+
+        /**
+         * Get videos (trailers) by movie id
+         * @param movieId
+         * @param callback
+         */
+        @GET("movie/{id}/videos")
+        void movieTrailers(@Path("id") long movieId, Callback<APIResult<Trailer>> callback);
+
+        /**
+         * Get reviews by movie id
+         * @param movieId
+         * @param callback
+         */
+        @GET("movie/{id}/reviews")
+        void movieReviews(@Path("id") long movieId, Callback<APIResult<Review>> callback);
 
     }
 

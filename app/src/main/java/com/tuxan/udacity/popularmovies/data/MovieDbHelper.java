@@ -17,9 +17,9 @@ public class MovieDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String SQL_CREATE_WEATHER_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
+        final String SQL_CREATE_MOVIE_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
 
-                MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                MovieEntry._ID + " INTEGER PRIMARY KEY, " +
 
                 MovieEntry.COLUMN_ORIGINAL_TITLE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_OVERVIEW + " TEXT NOT NULL, " +
@@ -33,12 +33,33 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_FAVORITE + " INTEGER NOT NULL, " +
                 MovieEntry.COLUMN_WATCHED + " INTEGER NOT NULL );";
 
-        db.execSQL(SQL_CREATE_WEATHER_TABLE);
+        db.execSQL(SQL_CREATE_MOVIE_TABLE);
+
+        final String SQL_CREATE_REVIEW_TABLE = "CREATE TABLE " + ReviewEntry.TABLE_NAME + " (" +
+
+                ReviewEntry._ID + " INTEGER PRIMARY KEY, " +
+
+                ReviewEntry.COLUMN_MOVIE_ID + " INTEGER NOT NULL, " +
+                ReviewEntry.COLUMN_AUTHOR + " TEXT NOT NULL, " +
+                ReviewEntry.COLUMN_CONTENT + " TEXT NOT NULL );";
+
+        db.execSQL(SQL_CREATE_REVIEW_TABLE);
+
+        final String SQL_CREATE_TRAILER_TABLE = "CREATE TABLE " + TrailerEntry.TABLE_NAME + " (" +
+
+                TrailerEntry._ID + " INTEGER PRIMARY KEY, " +
+
+                TrailerEntry.COLUMN_KEY + " TEXT NOT NULL, " +
+                TrailerEntry.COLUMN_NAME + " TEXT NOT NULL );";
+
+        db.execSQL(SQL_CREATE_TRAILER_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + ReviewEntry.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + TrailerEntry.TABLE_NAME);
         onCreate(db);
     }
 }

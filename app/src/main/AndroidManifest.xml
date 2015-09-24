@@ -19,9 +19,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!--<service android:name=".service.SyncMovieService" />
-        <receiver android:name=".service.SyncMovieService$AlarmReceiver" android:enabled="true" />-->
-
         <service
             android:name="com.tuxan.udacity.popularmovies.sync.PopularMoviesAuthenticatorService" >
             <intent-filter>

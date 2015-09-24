@@ -6,11 +6,11 @@ import java.util.Date;
 /**
  * Movie pojo for deserialization from TMDb API response
  */
-public class Movie implements Serializable{
+public class Movie implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private int id;
+    private long id;
     private String poster_path;
     private String backdrop_path;
     private String original_title;
@@ -19,11 +19,11 @@ public class Movie implements Serializable{
     private float vote_average;
     private String release_date;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -81,5 +81,24 @@ public class Movie implements Serializable{
 
     public void setRelease_date(String release_date) {
         this.release_date = release_date;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == null)
+            return false;
+
+        if (!(o instanceof Movie))
+            return false;
+
+        Movie m = (Movie) o;
+        long movieId = m.getId();
+
+        if (movieId == 0)
+            return false;
+
+        return id == m.getId();
+
     }
 }

@@ -10,15 +10,23 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
 
-import com.tuxan.udacity.popularmovies.R;
 
 public class MovieProvider extends ContentProvider{
 
     private final String LOG_TAG = MovieProvider.class.getSimpleName();
 
+    // possible values to use with MovieEntry.builMoviesUri
+    public static final String FILTER_BY_FAVORITE = "favorite";
+    public static final String FILTER_BY_POPULARITY = "popularity.desc";
+    public static final String FILTER_BY_VOTEAVERAGE = "vote_average.desc";
+
     public static final int MOVIE = 100;
     public static final int MOVIE_DETAIL = 101;
     public static final int MOVIES = 102;
+    public static final int REVIEW = 200;
+    public static final int REVIEWS = 201;
+    public static final int TRAILER = 300;
+    public static final int TRAILERS = 301;
 
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private MovieDbHelper mDb;
@@ -30,9 +38,13 @@ public class MovieProvider extends ContentProvider{
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIE + "/#", MOVIE_DETAIL);
         matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_MOVIE + "/*", MOVIES);
 
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEW, REVIEW);
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_REVIEW + "/#", REVIEWS);
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILER, TRAILER);
+        matcher.addURI(MovieContract.CONTENT_AUTHORITY, MovieContract.PATH_TRAILER + "/#", TRAILERS);
+
         return matcher;
     }
-
 
     @Override
     public boolean onCreate() {
@@ -62,13 +74,13 @@ public class MovieProvider extends ContentProvider{
                 selection = null;
                 String limit = null;
 
-                if (param.equals(MovieContract.MovieEntry.FILTER_BY_FAVORITE)) {
+                if (param.equals(FILTER_BY_FAVORITE)) {
                     selection = MovieContract.MovieEntry.COLUMN_FAVORITE + " = ? ";
                     selectionArgs = new String[] { "1" };
-                } else if (param.equals(MovieContract.MovieEntry.FILTER_BY_VOTEAVERAGE)) {
+                } else if (param.equals(FILTER_BY_VOTEAVERAGE)) {
                     sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC ";
                     limit = "20";
-                } else if (param.equals(MovieContract.MovieEntry.FILTER_BY_POPULARITY)) {
+                } else if (param.equals(FILTER_BY_POPULARITY)) {
                     sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC ";
                     limit = "20";
                 }
@@ -83,6 +95,7 @@ public class MovieProvider extends ContentProvider{
                         limit);
                 break;
             }
+            // "movie"
             case MOVIE: {
                 c = mDb.getReadableDatabase().query(
                         MovieContract.MovieEntry.TABLE_NAME,
@@ -92,6 +105,54 @@ public class MovieProvider extends ContentProvider{
                         null,
                         null,
                         sortOrder);
+                break;
+            }
+            // "review"
+            case REVIEW: {
+                c = mDb.getReadableDatabase().query(
+                        MovieContract.ReviewEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            // "review/#"
+            case REVIEWS: {
+                c = mDb.getReadableDatabase().query(
+                        MovieContract.ReviewEntry.TABLE_NAME,
+                        projection,
+                        MovieContract.ReviewEntry._ID + " = ? ",
+                        new String[] { uri.getLastPathSegment() },
+                        null,
+                        null,
+                        null);
+                break;
+            }
+            // "trailer"
+            case TRAILER: {
+                c = mDb.getReadableDatabase().query(
+                        MovieContract.TrailerEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                break;
+            }
+            // "trailer/#"
+            case TRAILERS: {
+                c = mDb.getReadableDatabase().query(
+                        MovieContract.TrailerEntry.TABLE_NAME,
+                        projection,
+                        MovieContract.TrailerEntry._ID + " = ? ",
+                        new String[] { uri.getLastPathSegment() },
+                        null,
+                        null,
+                        null);
                 break;
             }
 
@@ -114,6 +175,11 @@ public class MovieProvider extends ContentProvider{
             case MOVIE:
             case MOVIES: return MovieContract.MovieEntry.CONTENT_TYPE; // type DIR
             case MOVIE_DETAIL: return MovieContract.MovieEntry.CONTENT_ITEM_TYPE; // type ITEM
+            case REVIEW: return MovieContract.ReviewEntry.CONTENT_ITEM_TYPE; // type ITEM
+            case REVIEWS: return MovieContract.ReviewEntry.CONTENT_TYPE; // type DIR
+            case TRAILER: return MovieContract.TrailerEntry.CONTENT_ITEM_TYPE; // type ITEM
+            case TRAILERS: return MovieContract.TrailerEntry.CONTENT_TYPE; // type DIR
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -134,6 +200,24 @@ public class MovieProvider extends ContentProvider{
 
             if (id > 0)
                 returnUri = MovieContract.MovieEntry.buildMovieUri(id);
+            else
+                throw new SQLException("Failed to insert row into " + uri);
+        } else if (match == TRAILER) {
+            long id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, values);
+
+            Log.d(LOG_TAG, "Insert Id result: " + id);
+
+            if (id > 0)
+                returnUri = MovieContract.TrailerEntry.buildTrailerUri(id);
+            else
+                throw new SQLException("Failed to insert row into " + uri);
+        } else if (match == REVIEW) {
+            long id = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, values);
+
+            Log.d(LOG_TAG, "Insert Id result: " + id);
+
+            if (id > 0)
+                returnUri = MovieContract.ReviewEntry.buildReviewUri(id);
             else
                 throw new SQLException("Failed to insert row into " + uri);
         } else {
@@ -157,6 +241,10 @@ public class MovieProvider extends ContentProvider{
 
         if (match == MOVIE) {
             rowsDeleted = db.delete(MovieContract.MovieEntry.TABLE_NAME, selection, selectionArgs);
+        } else if (match == TRAILER) {
+            rowsDeleted = db.delete(MovieContract.TrailerEntry.TABLE_NAME, selection, selectionArgs);
+        } else if (match == REVIEW) {
+            rowsDeleted = db.delete(MovieContract.ReviewEntry.TABLE_NAME, selection, selectionArgs);
         } else {
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -181,6 +269,10 @@ public class MovieProvider extends ContentProvider{
 
         if (match == MOVIE) {
             rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection, selectionArgs);
+        } else if (match == TRAILER) {
+            rowsUpdated = db.update(MovieContract.TrailerEntry.TABLE_NAME, values, selection, selectionArgs);
+        } else if (match == REVIEWS) {
+            rowsUpdated = db.update(MovieContract.ReviewEntry.TABLE_NAME, values, selection, selectionArgs);
         } else {
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -198,19 +290,23 @@ public class MovieProvider extends ContentProvider{
         final SQLiteDatabase db = mDb.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
 
+        int rowsInserted = 0;
+
         if (match == MOVIE) {
 
             db.beginTransaction();
-            int rowsInserted = 0;
-            try {
+            Cursor c = null;
 
+            try {
+                // If the inserted row already exist
+                // we update the current one
                 for (ContentValues v : values) {
 
                     // check if exist
-                    Cursor c = db.query(MovieContract.MovieEntry.TABLE_NAME,
+                    c = db.query(MovieContract.MovieEntry.TABLE_NAME,
                             null,
                             "_id = ?",
-                            new String[]{ v.get(MovieContract.MovieEntry._ID).toString() },
+                            new String[]{v.get(MovieContract.MovieEntry._ID).toString()},
                             null,
                             null,
                             null);
@@ -226,7 +322,7 @@ public class MovieProvider extends ContentProvider{
                         id = db.update(MovieContract.MovieEntry.TABLE_NAME,
                                 v,
                                 "_id = ?",
-                                new String[] { v.get(MovieContract.MovieEntry._ID).toString() });
+                                new String[]{v.get(MovieContract.MovieEntry._ID).toString()});
 
                         if (id != -1)
                             rowsInserted++;
@@ -236,6 +332,9 @@ public class MovieProvider extends ContentProvider{
                 db.setTransactionSuccessful();
 
             } finally {
+                if (c != null)
+                    c.close();
+
                 db.endTransaction();
             }
 
@@ -244,11 +343,91 @@ public class MovieProvider extends ContentProvider{
             Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
 
             return rowsInserted;
-        } else {
-            return super.bulkInsert(uri, values);
-        }
-    }
+        } else if (match == TRAILER) {
 
+            db.beginTransaction();
+            Cursor c = null;
+
+            try {
+                for (ContentValues v : values) {
+
+                    // check if exist
+                    c = db.query(MovieContract.TrailerEntry.TABLE_NAME,
+                            null,
+                            "_id = ?",
+                            new String[]{ v.get(MovieContract.TrailerEntry._ID).toString() },
+                            null,
+                            null,
+                            null);
+
+                    long id = -1;
+
+                    if (c.getCount() == 0) {
+                        id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, v);
+                        if (id != -1)
+                            rowsInserted++;
+                    }
+                }
+
+                db.setTransactionSuccessful();
+
+            } finally {
+                if (c != null)
+                    c.close();
+
+                db.endTransaction();
+            }
+
+            getContext().getContentResolver().notifyChange(uri, null);
+
+            Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
+
+            return rowsInserted;
+
+        } else if (match == REVIEW) {
+
+            db.beginTransaction();
+            Cursor c = null;
+
+            try {
+                for (ContentValues v : values) {
+
+                    // check if exist
+                    c = db.query(MovieContract.ReviewEntry.TABLE_NAME,
+                            null,
+                            "_id = ?",
+                            new String[]{ v.get(MovieContract.ReviewEntry._ID).toString() },
+                            null,
+                            null,
+                            null);
+
+                    long id = -1;
+
+                    if (c.getCount() == 0) {
+                        id = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, v);
+                        if (id != -1)
+                            rowsInserted++;
+                    }
+                }
+
+                db.setTransactionSuccessful();
+
+            } finally {
+                if (c != null)
+                    c.close();
+
+                db.endTransaction();
+            }
+
+            getContext().getContentResolver().notifyChange(uri, null);
+
+            Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
+
+            return rowsInserted;
+        }
+
+        return super.bulkInsert(uri, values);
+    }
 
     // You do not need to call this method. This is a method specifically to assist the testing
     // framework in running smoothly. You can read more at:

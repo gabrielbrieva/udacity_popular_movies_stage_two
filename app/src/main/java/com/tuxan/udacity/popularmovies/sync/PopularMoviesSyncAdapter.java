@@ -17,9 +17,12 @@ import com.tuxan.udacity.popularmovies.R;
 import com.tuxan.udacity.popularmovies.TMDbServiceFactory;
 import com.tuxan.udacity.popularmovies.Utils;
 import com.tuxan.udacity.popularmovies.data.MovieContract;
-import com.tuxan.udacity.popularmovies.model.DiscoverResult;
+import com.tuxan.udacity.popularmovies.data.MovieProvider;
+import com.tuxan.udacity.popularmovies.model.APIResult;
 import com.tuxan.udacity.popularmovies.model.Movie;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import retrofit.Callback;
@@ -30,7 +33,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private final String LOG_TAG = PopularMoviesSyncAdapter.class.getSimpleName();
 
-    // Interval at which to sync with the weather, in seconds.
+    // Interval at which to sync with TMDb API, in seconds.
     // 60 seconds (1 minute) * 180 = 3 hours
     public static final int SYNC_INTERVAL = 60 * 180;
     public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
@@ -54,63 +57,86 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
         // checking if the device have internet connection
         if (Utils.isNetworkConnected(getContext())) {
-            syncByFilter(MovieContract.MovieEntry.FILTER_BY_POPULARITY,
-                    MovieContract.MovieEntry.FILTER_BY_VOTEAVERAGE);
-        }
-    }
 
-    private void syncByFilter(String... filterBy) {
+            final List<Movie> movies = new ArrayList<>();
 
-        for(String filter : filterBy) {
-
-            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + filter);
+            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_POPULARITY);
             TMDbServiceFactory.createService(getContext().getString(R.string.api_key))
-                    .discover(filter, new Callback<DiscoverResult>() {
+                    .discover(MovieProvider.FILTER_BY_POPULARITY, new Callback<APIResult<Movie>>() {
                         @Override
-                        public void success(DiscoverResult discover, Response resp) {
+                        public void success(APIResult<Movie> discover, Response resp) {
 
-                            if (discover != null && discover.results != null && !discover.results.isEmpty()) {
+                            if (discover != null && discover.results != null && !discover.results.isEmpty())
+                                movies.addAll(discover.results);
 
-                                Log.d(LOG_TAG, "**** Request result size: " + discover.results.size());
+                            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_VOTEAVERAGE);
+                            TMDbServiceFactory.createService(getContext().getString(R.string.api_key))
+                                    .discover(MovieProvider.FILTER_BY_VOTEAVERAGE, new Callback<APIResult<Movie>>() {
+                                        @Override
+                                        public void success(APIResult<Movie> discover, Response resp) {
+                                            for (Movie m : discover.results) {
+                                                if (!movies.contains(m))
+                                                    movies.add(m);
+                                            }
 
-                                Vector<ContentValues> movies = new Vector<>(discover.results.size());
+                                            syncMovies(movies);
+                                        }
 
-                                for (Movie m : discover.results) {
-                                    ContentValues values = new ContentValues();
-
-                                    values.put(MovieContract.MovieEntry._ID, m.getId());
-                                    values.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, m.getOriginal_title());
-                                    values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, m.getOverview());
-                                    values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, m.getRelease_date());
-                                    values.put(MovieContract.MovieEntry.COLUMN_POPULARITY, m.getPopularity());
-                                    values.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, m.getVote_average());
-                                    values.put(MovieContract.MovieEntry.COLUMN_POSTER_IMAGE_PATH, m.getPoster_path());
-                                    values.put(MovieContract.MovieEntry.COLUMN_BACKDROP_IMAGE_PATH, m.getBackdrop_path());
-                                    values.put(MovieContract.MovieEntry.COLUMN_VIDEO, 0);
-                                    values.put(MovieContract.MovieEntry.COLUMN_WATCHED, 0);
-                                    values.put(MovieContract.MovieEntry.COLUMN_FAVORITE, 0);
-
-                                    movies.add(values);
-                                }
-
-                                if (movies.size() > 0) {
-                                    ContentValues[] cvArray = new ContentValues[movies.size()];
-                                    movies.toArray(cvArray);
-
-                                    Log.d(LOG_TAG, "**** Bulk insert of results Movies...");
-
-                                    // the bulkInsert method update a row if already exist
-                                    mContentResolver.bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
-                                }
-                            }
+                                        @Override
+                                        public void failure(RetrofitError error) {
+                                            Log.d(LOG_TAG, "Error during Request to TMDb API: " + error.getMessage());
+                                        }
+                                    });
                         }
 
                         @Override
                         public void failure(RetrofitError error) {
-
+                            Log.d(LOG_TAG, "Error during Request to TMDb API: " + error.getMessage());
                         }
                     });
         }
+    }
+
+    private void syncMovies(List<Movie> movies) {
+
+        if (movies != null && !movies.isEmpty()) {
+
+            Log.d(LOG_TAG, "**** Movies to sync size: " + movies.size());
+
+            Vector<ContentValues> vMovies = new Vector<>(movies.size());
+
+            for (Movie m : movies) {
+                ContentValues values = new ContentValues();
+
+                values.put(MovieContract.MovieEntry._ID, m.getId());
+                values.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, m.getOriginal_title());
+                values.put(MovieContract.MovieEntry.COLUMN_OVERVIEW, m.getOverview());
+                values.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, m.getRelease_date());
+                values.put(MovieContract.MovieEntry.COLUMN_POPULARITY, m.getPopularity());
+                values.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, m.getVote_average());
+                values.put(MovieContract.MovieEntry.COLUMN_POSTER_IMAGE_PATH, m.getPoster_path());
+                values.put(MovieContract.MovieEntry.COLUMN_BACKDROP_IMAGE_PATH, m.getBackdrop_path());
+                values.put(MovieContract.MovieEntry.COLUMN_VIDEO, 0);
+                values.put(MovieContract.MovieEntry.COLUMN_WATCHED, 0);
+                values.put(MovieContract.MovieEntry.COLUMN_FAVORITE, 0);
+
+                vMovies.add(values);
+            }
+
+            if (vMovies.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[vMovies.size()];
+                vMovies.toArray(cvArray);
+
+                Log.d(LOG_TAG, "**** Bulk insert of results Movies...");
+
+                // the bulkInsert method update a row if already exist
+                mContentResolver.bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+            }
+
+            // TODO: Delete old movies, reviews and trailers
+        }
+
+
     }
 
     /**
