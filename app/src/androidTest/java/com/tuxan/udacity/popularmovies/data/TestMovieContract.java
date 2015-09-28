@@ -3,6 +3,8 @@ package com.tuxan.udacity.popularmovies.data;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import com.tuxan.udacity.popularmovies.R;
+
 public class TestMovieContract extends AndroidTestCase {
 
     private static final long TEST_MOVIE_ID = 12345;
@@ -14,7 +16,7 @@ public class TestMovieContract extends AndroidTestCase {
 
         assertEquals("ID don't match", Long.toString(TEST_MOVIE_ID), movieUri.getLastPathSegment());
 
-        assertEquals("uri don't match", movieUri.toString(), "content://com.tuxan.udacity.popularmovies/movie/" + TEST_MOVIE_ID);
+        assertEquals("uri don't match", movieUri.toString(), "content://" + mContext.getString(R.string.content_authority) + "/movie/" + TEST_MOVIE_ID);
 
         Uri moviesUri = MovieContract.MovieEntry.buildMoviesUri("favorite");
 
@@ -22,7 +24,7 @@ public class TestMovieContract extends AndroidTestCase {
 
         assertEquals("filterby value don't match", "favorite", moviesUri.getLastPathSegment());
 
-        assertEquals("uri don't match", moviesUri.toString(), "content://com.tuxan.udacity.popularmovies/movie/favorite");
+        assertEquals("uri don't match", moviesUri.toString(), "content://" + mContext.getString(R.string.content_authority) + "/movie/favorite");
     }
 
 }

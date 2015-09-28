@@ -147,6 +147,4 @@ public class TestProvider extends AndroidTestCase {
 
         assertEquals(count, 1);
     }
-
-    // TODO: add bulk insert test
 }

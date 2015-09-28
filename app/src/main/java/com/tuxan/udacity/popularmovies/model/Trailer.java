@@ -6,20 +6,11 @@ public class Trailer implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private long id;
     private long movie_id;
-    private String key;
+    private String source;
     private String name;
 
     public Trailer() { }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
 
     public long getMovie_id() {
         return movie_id;
@@ -29,12 +20,12 @@ public class Trailer implements Serializable {
         this.movie_id = movie_id;
     }
 
-    public String getKey() {
-        return key;
+    public String getSource() {
+        return source;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setSource(String source){
+        this.source = source;
     }
 
     public String getName() {

@@ -22,6 +22,8 @@
 
     <!-- Movie Detail texts -->
     <string name="movie_detail_overview_title">Overview</string>
+    <string name="movie_detail_trailers_title">Trailers</string>
+    <string name="movie_detail_reviews_title">Reviews</string>
     <string name="movie_detail_release_date">Release Date</string>
     <string name="movie_detail_rating">Rating</string>s
 

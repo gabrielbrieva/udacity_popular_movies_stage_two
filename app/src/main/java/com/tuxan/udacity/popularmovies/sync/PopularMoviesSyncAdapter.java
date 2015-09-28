@@ -28,6 +28,7 @@ import java.util.Vector;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import rx.Observable;
 
 public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -61,8 +62,10 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             final List<Movie> movies = new ArrayList<>();
 
             Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_POPULARITY);
-            TMDbServiceFactory.createService(getContext().getString(R.string.api_key))
-                    .discover(MovieProvider.FILTER_BY_POPULARITY, new Callback<APIResult<Movie>>() {
+
+            final TMDbServiceFactory.TMDbService service = TMDbServiceFactory.createService(getContext().getString(R.string.api_key));
+
+                service.discover(MovieProvider.FILTER_BY_POPULARITY, new Callback<APIResult<Movie>>() {
                         @Override
                         public void success(APIResult<Movie> discover, Response resp) {
 
@@ -70,23 +73,22 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                                 movies.addAll(discover.results);
 
                             Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_VOTEAVERAGE);
-                            TMDbServiceFactory.createService(getContext().getString(R.string.api_key))
-                                    .discover(MovieProvider.FILTER_BY_VOTEAVERAGE, new Callback<APIResult<Movie>>() {
-                                        @Override
-                                        public void success(APIResult<Movie> discover, Response resp) {
-                                            for (Movie m : discover.results) {
-                                                if (!movies.contains(m))
-                                                    movies.add(m);
-                                            }
+                            service.discover(MovieProvider.FILTER_BY_VOTEAVERAGE, new Callback<APIResult<Movie>>() {
+                                @Override
+                                public void success(APIResult<Movie> discover, Response resp) {
+                                    for (Movie m : discover.results) {
+                                        if (!movies.contains(m))
+                                            movies.add(m);
+                                    }
 
-                                            syncMovies(movies);
-                                        }
+                                    syncMovies(movies);
+                                }
 
-                                        @Override
-                                        public void failure(RetrofitError error) {
-                                            Log.d(LOG_TAG, "Error during Request to TMDb API: " + error.getMessage());
-                                        }
-                                    });
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    Log.d(LOG_TAG, "Error during Request to TMDb API: " + error.getMessage());
+                                }
+                            });
                         }
 
                         @Override
@@ -166,6 +168,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+
         ContentResolver.requestSync(getSyncAccount(context),
                 context.getString(R.string.content_authority), bundle);
     }

@@ -9,7 +9,9 @@ import android.net.NetworkInfo;
  */
 public class Utils {
 
-    public static final String IMG_END_POINT = "http://image.tmdb.org/t/p/"; // end point used to load movie poster and backdrop images.
+    public static final String YOUTUBE_VIDEO_END_POINT = "https://www.youtube.com/watch?v="; // endpoint used to load a youtube video using youtube page or android app
+    public static final String YOUTUBE_IMAGE_END_POINT = "http://img.youtube.com/vi/"; // endpoint used to load youtube trailer thumbs images.
+    public static final String IMG_END_POINT = "http://image.tmdb.org/t/p/"; // endpoint used to load movie poster and backdrop images.
     public static final String END_POINT_PATH = "http://api.themoviedb.org/3"; // end point used by API http request.
 
     /**

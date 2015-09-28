@@ -90,4 +90,28 @@ public class TestDb extends AndroidTestCase {
         c.close();
         db.close();
     }
+
+    public void testReviewTable() {
+        SQLiteDatabase db = new MovieDbHelper(mContext).getWritableDatabase();
+        assertEquals("Db is not open :(", true, db.isOpen());
+
+        ContentValues reviewValues = new ContentValues();
+
+        reviewValues.put(MovieContract.ReviewEntry.COLUMN_REVIEW_ID, "test");
+        reviewValues.put(MovieContract.ReviewEntry.COLUMN_MOVIE_ID, 123);
+        reviewValues.put(MovieContract.ReviewEntry.COLUMN_CONTENT, "content");
+        reviewValues.put(MovieContract.ReviewEntry.COLUMN_AUTHOR, "author");
+
+        long insertedReviewId = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, reviewValues);
+
+        assertTrue("Review not inserted :(", insertedReviewId != -1);
+
+        if (insertedReviewId > -1) {
+            int deletedRows = 0;
+
+            deletedRows = db.delete(MovieContract.ReviewEntry.TABLE_NAME, MovieContract.ReviewEntry._ID + " = ? ", new String[]{ Long.toString(insertedReviewId) });
+
+            assertTrue("Review not deleted :(", deletedRows > 0);
+        }
+    }
 }

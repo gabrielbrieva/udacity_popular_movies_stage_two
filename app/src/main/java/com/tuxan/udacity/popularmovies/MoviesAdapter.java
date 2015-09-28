@@ -10,6 +10,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.tuxan.udacity.popularmovies.MoviesFragment;
+import com.tuxan.udacity.popularmovies.R;
+import com.tuxan.udacity.popularmovies.Utils;
 
 public class MoviesAdapter extends CursorAdapter {
 

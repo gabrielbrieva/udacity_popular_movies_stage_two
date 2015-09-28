@@ -4,6 +4,7 @@ import com.tuxan.udacity.popularmovies.model.APIResult;
 import com.tuxan.udacity.popularmovies.model.Movie;
 import com.tuxan.udacity.popularmovies.model.Review;
 import com.tuxan.udacity.popularmovies.model.Trailer;
+import com.tuxan.udacity.popularmovies.model.TrailerResult;
 
 import retrofit.Callback;
 import retrofit.RequestInterceptor;
@@ -72,15 +73,15 @@ public class TMDbServiceFactory {
          * @param movieId
          * @param callback
          */
-        @GET("movie/{id}/videos")
-        void movieTrailers(@Path("id") long movieId, Callback<APIResult<Trailer>> callback);
+        @GET("/movie/{id}/trailers")
+        void movieTrailers(@Path("id") long movieId, Callback<TrailerResult> callback);
 
         /**
          * Get reviews by movie id
          * @param movieId
          * @param callback
          */
-        @GET("movie/{id}/reviews")
+        @GET("/movie/{id}/reviews")
         void movieReviews(@Path("id") long movieId, Callback<APIResult<Review>> callback);
 
     }

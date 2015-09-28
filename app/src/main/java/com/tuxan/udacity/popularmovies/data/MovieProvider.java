@@ -124,7 +124,7 @@ public class MovieProvider extends ContentProvider{
                 c = mDb.getReadableDatabase().query(
                         MovieContract.ReviewEntry.TABLE_NAME,
                         projection,
-                        MovieContract.ReviewEntry._ID + " = ? ",
+                        MovieContract.ReviewEntry.COLUMN_MOVIE_ID + " = ? ",
                         new String[] { uri.getLastPathSegment() },
                         null,
                         null,
@@ -148,7 +148,7 @@ public class MovieProvider extends ContentProvider{
                 c = mDb.getReadableDatabase().query(
                         MovieContract.TrailerEntry.TABLE_NAME,
                         projection,
-                        MovieContract.TrailerEntry._ID + " = ? ",
+                        MovieContract.TrailerEntry.COLUMN_MOVIE_ID + " = ? ",
                         new String[] { uri.getLastPathSegment() },
                         null,
                         null,
@@ -175,9 +175,9 @@ public class MovieProvider extends ContentProvider{
             case MOVIE:
             case MOVIES: return MovieContract.MovieEntry.CONTENT_TYPE; // type DIR
             case MOVIE_DETAIL: return MovieContract.MovieEntry.CONTENT_ITEM_TYPE; // type ITEM
-            case REVIEW: return MovieContract.ReviewEntry.CONTENT_ITEM_TYPE; // type ITEM
+            case REVIEW:
             case REVIEWS: return MovieContract.ReviewEntry.CONTENT_TYPE; // type DIR
-            case TRAILER: return MovieContract.TrailerEntry.CONTENT_ITEM_TYPE; // type ITEM
+            case TRAILER:
             case TRAILERS: return MovieContract.TrailerEntry.CONTENT_TYPE; // type DIR
 
             default:
@@ -202,7 +202,7 @@ public class MovieProvider extends ContentProvider{
                 returnUri = MovieContract.MovieEntry.buildMovieUri(id);
             else
                 throw new SQLException("Failed to insert row into " + uri);
-        } else if (match == TRAILER) {
+        /*} else if (match == TRAILER) {
             long id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, values);
 
             Log.d(LOG_TAG, "Insert Id result: " + id);
@@ -219,7 +219,7 @@ public class MovieProvider extends ContentProvider{
             if (id > 0)
                 returnUri = MovieContract.ReviewEntry.buildReviewUri(id);
             else
-                throw new SQLException("Failed to insert row into " + uri);
+                throw new SQLException("Failed to insert row into " + uri);*/
         } else {
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -338,7 +338,8 @@ public class MovieProvider extends ContentProvider{
                 db.endTransaction();
             }
 
-            getContext().getContentResolver().notifyChange(uri, null);
+            if (rowsInserted > 0)
+                getContext().getContentResolver().notifyChange(uri, null);
 
             Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
 
@@ -354,8 +355,8 @@ public class MovieProvider extends ContentProvider{
                     // check if exist
                     c = db.query(MovieContract.TrailerEntry.TABLE_NAME,
                             null,
-                            "_id = ?",
-                            new String[]{ v.get(MovieContract.TrailerEntry._ID).toString() },
+                            MovieContract.TrailerEntry.COLUMN_SOURCE + " = ?",
+                            new String[]{ v.getAsString(MovieContract.TrailerEntry.COLUMN_SOURCE) },
                             null,
                             null,
                             null);
@@ -378,7 +379,8 @@ public class MovieProvider extends ContentProvider{
                 db.endTransaction();
             }
 
-            getContext().getContentResolver().notifyChange(uri, null);
+            if (rowsInserted > 0)
+                getContext().getContentResolver().notifyChange(uri, null);
 
             Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
 
@@ -395,8 +397,8 @@ public class MovieProvider extends ContentProvider{
                     // check if exist
                     c = db.query(MovieContract.ReviewEntry.TABLE_NAME,
                             null,
-                            "_id = ?",
-                            new String[]{ v.get(MovieContract.ReviewEntry._ID).toString() },
+                            MovieContract.ReviewEntry.COLUMN_REVIEW_ID + " = ?",
+                            new String[]{ v.getAsString(MovieContract.ReviewEntry.COLUMN_REVIEW_ID) },
                             null,
                             null,
                             null);
@@ -419,7 +421,8 @@ public class MovieProvider extends ContentProvider{
                 db.endTransaction();
             }
 
-            getContext().getContentResolver().notifyChange(uri, null);
+            if (rowsInserted > 0)
+                getContext().getContentResolver().notifyChange(uri, null);
 
             Log.d(LOG_TAG, "Total bulk insert rows result: " + rowsInserted);
 
@@ -427,6 +430,14 @@ public class MovieProvider extends ContentProvider{
         }
 
         return super.bulkInsert(uri, values);
+    }
+
+    public int deleteByMoviesId(long[] moviesId) {
+        int rowsDeleted = 0;
+
+        // TODO delete old movie data
+
+        return rowsDeleted;
     }
 
     // You do not need to call this method. This is a method specifically to assist the testing
