@@ -7,14 +7,28 @@
 
     <TextView
         android:id="@+id/tv_review_author"
-        style="@style/Base.TextAppearance.AppCompat.Medium"
-        android:textColor="@color/pm_primary_dark"
+        android:textColor="@color/pm_review_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <TextView
+    <com.tuxan.udacity.popularmovies.views.ExpandableTextView
         android:id="@+id/tv_review_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:maxLines="5"
+        android:ellipsize="end" />
+
+    <!--<TextView
+        android:id="@+id/tv_review_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxLength="50"
+        android:ellipsize="end"/>
+
+    <Button
+        android:id="@+id/bt_review_see_more"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="See more"/>-->
 
 </LinearLayout>

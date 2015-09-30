@@ -9,6 +9,7 @@
         http://inthecheesefactory.com/blog/correct-imageview-adjustviewbounds-with-adjustable-imageview/en
      -->
     <com.inthecheesefactory.thecheeselibrary.widget.AdjustableImageView
+        android:transitionName="@string/poster_share_element"
         android:id="@+id/iv_movie_poster"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

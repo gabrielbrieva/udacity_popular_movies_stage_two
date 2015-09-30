@@ -59,7 +59,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         /**
          * DetailMovieCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri detailUri);
+        public void onItemSelected(Uri detailUri, View sharedView);
     }
 
     public MoviesFragment() {}
@@ -109,7 +109,8 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                 if (cursor != null) {
                     ((Callback) getActivity())
                             .onItemSelected(
-                                    MovieContract.MovieEntry.buildMovieUri(cursor.getLong(COL_MOVIE_ID))
+                                    MovieContract.MovieEntry.buildMovieUri(cursor.getLong(COL_MOVIE_ID)),
+                                    view.findViewById(R.id.iv_movie_poster)
                             );
                 }
 

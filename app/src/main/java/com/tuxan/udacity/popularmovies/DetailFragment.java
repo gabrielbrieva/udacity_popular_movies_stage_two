@@ -1,11 +1,14 @@
 package com.tuxan.udacity.popularmovies;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -15,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -116,10 +120,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         public final TextView author;
         public final TextView content;
+        //public final Button seeMore;
 
         public ReviewViewHolder(View view) {
             author = (TextView) view.findViewById(R.id.tv_review_author);
             content = (TextView) view.findViewById(R.id.tv_review_content);
+            //seeMore = (Button) view.findViewById(R.id.bt_review_see_more);
         }
     }
 
@@ -127,10 +133,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         public final TextView name;
         public final ImageView image;
+        public final Button button;
 
         public TrailerViewHolder(View view) {
             name = (TextView) view.findViewById(R.id.tv_trailer_name);
             image = (ImageView) view.findViewById(R.id.iv_trailer_image);
+            button = (Button) view.findViewById(R.id.bt_trailer);
         }
     }
 
@@ -259,16 +267,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 while (data.moveToNext()) {
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.review, mReviewsView, false);
-                    ReviewViewHolder reviewViewHolder = new ReviewViewHolder(view);
+                    final ReviewViewHolder reviewViewHolder = new ReviewViewHolder(view);
                     reviewViewHolder.author.setText(data.getString(ReviewColumnIndex.COL_AUTHOR));
                     reviewViewHolder.content.setText(data.getString(ReviewColumnIndex.COL_CONTENT));
+
                     view.setTag(reviewViewHolder);
                     mReviewsView.addView(view);
                 }
 
-                //mReviewsAdapter.swapCursor(data);
-
-                // TODO update ui
             } else {
                 Log.d("FRAGMENT DETAIL", "reviews not found");
 
@@ -313,7 +319,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     @Override
                     public void failure(RetrofitError error) {
-                        // TODO show error to show reviews
                         Log.d("FRAGMENT DETAIL", "error during review API Request: " + error.getMessage());
                     }
                 });
@@ -336,9 +341,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                             .placeholder(R.drawable.poster_missing)
                             .into(trailerViewHolder.image); // put the result image in ImageView
 
-                    view.setTag(trailerViewHolder);
-
-                    view.setOnClickListener(new View.OnClickListener() {
+                    trailerViewHolder.button.setOnClickListener(new View.OnClickListener() {
 
                         final Uri youtubeUri = Uri.parse(Utils.YOUTUBE_VIDEO_END_POINT + data.getString(TrailerColumnIndex.COL_SOURCE));
 
@@ -348,11 +351,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         }
                     });
 
+                    view.setTag(trailerViewHolder);
+
                     mTrailersView.addView(view);
                 }
             } else {
                 Log.d("FRAGMENT DETAIL", "trailers not found");
-                // TODO load from API and save on local database
 
                 mService.movieTrailers(mMovieId, new Callback<TrailerResult>() {
                     @Override
@@ -392,7 +396,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     @Override
                     public void failure(RetrofitError error) {
-                        // TODO show error
                         Log.d("FRAGMENT DETAIL", "error during trailer API Request: " + error.getMessage());
                     }
                 });
@@ -404,8 +407,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        // TODO check if we need to do something
-
         if (loader.getId() == REVIEWS_LOADER)
             mReviewsView.removeAllViews();
             //mReviewsAdapter.swapCursor(null);

@@ -5,6 +5,9 @@
     <!-- only debug -->
     <string name="action_refresh">Refresh</string>
 
+    <!-- transitions -->
+    <string name="poster_share_element">poster_share_element</string>
+
     <!-- Preferences Strings -->
     <string name="pref_sort_key">pref_sort</string>
     <string name="pref_sort_label">Sort Movies by</string>

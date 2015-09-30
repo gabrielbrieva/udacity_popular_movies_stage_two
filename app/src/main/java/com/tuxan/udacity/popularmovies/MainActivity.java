@@ -1,13 +1,16 @@
 package com.tuxan.udacity.popularmovies;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.tuxan.udacity.popularmovies.sync.PopularMoviesSyncAdapter;
 
@@ -69,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
     }
 
     @Override
-    public void onItemSelected(Uri detailUri) {
+    public void onItemSelected(Uri detailUri, View shareView) {
         if (mTwoPane) {
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -85,7 +88,20 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
                     .commit();
         } else {
             Intent intent = new Intent(this, DetailActivity.class).setData(detailUri);
-            startActivity(intent);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // transition between two poster images
+                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(
+                        this,
+                        shareView,
+                        shareView.getTransitionName()
+                ).toBundle();
+
+                startActivity(intent, bundle);
+
+            } else {
+                startActivity(intent);
+            }
         }
     }
 }

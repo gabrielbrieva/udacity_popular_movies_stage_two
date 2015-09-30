@@ -23,6 +23,7 @@
                 android:padding="5dp">
 
                 <ImageView
+                    android:transitionName="@string/poster_share_element"
                     android:id="@+id/ivDetailPoster"
                     android:layout_width="100dp"
                     android:layout_height="150dp"
@@ -68,14 +69,12 @@
             <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="5dp"
-                android:focusable="false">
+                android:padding="5dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/TextAppearance.AppCompat.Large"
-                    android:layout_marginBottom="5dp"
+                    style="@style/PopularMovieSubtitle"
                     android:text="@string/movie_detail_overview_title" />
 
                 <TextView android:id="@+id/tvOverview"
@@ -83,11 +82,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp" />
-
-                <ListView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/lvTrailers"/>
 
             </LinearLayout>
 
@@ -105,14 +99,12 @@
             <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="5dp"
-                android:focusable="false">
+                android:padding="5dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/TextAppearance.AppCompat.Large"
-                    android:layout_marginBottom="5dp"
+                    style="@style/PopularMovieSubtitle"
                     android:text="@string/movie_detail_trailers_title" />
 
                 <HorizontalScrollView
@@ -148,14 +140,12 @@
             <LinearLayout android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="5dp"
-                android:focusable="false">
+                android:padding="5dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/TextAppearance.AppCompat.Large"
-                    android:layout_marginBottom="5dp"
+                    style="@style/PopularMovieSubtitle"
                     android:text="@string/movie_detail_reviews_title" />
 
                 <LinearLayout

@@ -12,4 +12,8 @@
     <color name="pm_grid_title_background">#CC000000</color>
     <color name="pm_grid_title_text">#FFFFFFFF</color>
     <color name="pm_grid_selection">#66009688</color>
+
+    <!-- Movie Detail -->
+    <color name="pm_subtitles">#004b3b</color>
+    <color name="pm_review_author">#FF007868</color>
 </resources>

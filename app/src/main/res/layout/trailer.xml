@@ -2,21 +2,42 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp">
+    android:layout_margin="5dp"
+    android:padding="2dp"
+    >
 
     <ImageView
         android:id="@+id/iv_trailer_image"
         android:layout_width="130dp"
-        android:layout_height="100dp"/>
+        android:layout_height="100dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:focusable="true"
+        android:clickable="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/tv_trailer_name"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        style="@style/MovieGridTitle"
         android:singleLine="true"
         android:ellipsize="end"
         android:layout_width="130dp"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentLeft="false"
+        android:layout_alignParentStart="false"
+        android:layout_below="@+id/iv_trailer_image" />
+
+    <Button
+        android:id="@+id/bt_trailer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/trailer_select"
+        android:layout_alignBottom="@+id/tv_trailer_name"
+        android:layout_alignRight="@+id/iv_trailer_image"
+        android:layout_alignEnd="@+id/iv_trailer_image"
+        android:layout_alignTop="@+id/iv_trailer_image"
+        android:layout_alignLeft="@+id/iv_trailer_image"
+        android:layout_alignStart="@+id/iv_trailer_image" />
 
 </RelativeLayout>
