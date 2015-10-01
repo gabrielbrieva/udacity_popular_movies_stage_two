@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
 
         } else {
             mTwoPane = false;
-            //getSupportActionBar().setElevation(0f);
         }
 
         PopularMoviesSyncAdapter.initializeSyncAdapter(this);

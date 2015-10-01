@@ -1,19 +1,20 @@
 package com.tuxan.udacity.popularmovies;
 
-import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -88,7 +89,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public static final int COL_MOVIE_ID = 2;
         public static final int COL_AUTHOR = 3;
         public static final int COL_CONTENT = 4;
-    };
+    }
 
     private static final String[] TRAILER_COLUMNS = new String [] {
             MovieContract.TrailerEntry._ID,
@@ -102,10 +103,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public static final int COL_MOVIE_ID = 1;
         public static final int COL_SOURCE = 2;
         public static final int COL_NAME = 3;
-    };
+    }
+    private CollapsingToolbarLayout mCollapsingToolbarLayout;
+    private ImageView mToolbarImage;
+
+    private CardView mCvHeader;
+    private CardView mCvOverview;
+    private CardView mCvTrailers;
+    private CardView mCvReviews;
 
     private ImageView mPosterView;
-    private TextView mTitleView;
+    //private TextView mTitleView;
     private TextView mDateReleaseView;
     private TextView mVoteAverageView;
     private TextView mOverviewView;
@@ -114,18 +122,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private Picasso p;
 
-    //private ReviewsAdapter mReviewsAdapter;
-
     public static class ReviewViewHolder {
 
         public final TextView author;
         public final TextView content;
-        //public final Button seeMore;
 
         public ReviewViewHolder(View view) {
             author = (TextView) view.findViewById(R.id.tv_review_author);
             content = (TextView) view.findViewById(R.id.tv_review_content);
-            //seeMore = (Button) view.findViewById(R.id.bt_review_see_more);
         }
     }
 
@@ -156,8 +160,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        //mReviewsAdapter = new ReviewsAdapter(getActivity(), null, 0);
-
         p = Picasso.with(getActivity());
 
         // debugging purpose
@@ -171,7 +173,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
 
-        mTitleView = (TextView) view.findViewById(R.id.tvOriginalTitle);
+        mCollapsingToolbarLayout = ((CollapsingToolbarLayout) view.findViewById(R.id.collapsingToolbarLayout));
+        mToolbarImage = (ImageView) view.findViewById(R.id.ivBackdrop);
+
+        mCvHeader = (CardView) view.findViewById(R.id.cvMovieHeader);
+        mCvOverview = (CardView) view.findViewById(R.id.cvMovieOverview);
+        mCvTrailers = (CardView) view.findViewById(R.id.cvMovieTrailers);
+        mCvReviews = (CardView) view.findViewById(R.id.cvMovieReviews);
+
+        //mTitleView = (TextView) view.findViewById(R.id.tvOriginalTitle);
         mOverviewView = (TextView) view.findViewById(R.id.tvOverview);
         mDateReleaseView = (TextView) view.findViewById(R.id.tvDateRelease);
         mVoteAverageView = (TextView) view.findViewById(R.id.tvVoteAverage);
@@ -179,9 +189,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mReviewsView = (LinearLayout) view.findViewById(R.id.llReviewContainer);
         mTrailersView = (LinearLayout) view.findViewById(R.id.llTrailerContainer);
 
-        //mReviewsView.setAdapter(mReviewsAdapter);
-
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
     }
 
     @Override
@@ -240,16 +254,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (loader.getId() == DETAIL_LOADER) {
 
             if (data != null && data.moveToFirst()) {
-                mTitleView.setText(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
+                //mTitleView.setText(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
                 mDateReleaseView.setText(getString(R.string.movie_detail_release_date) + ": " + data.getString(MovieColumnIndex.COL_RELEASE_DATE));
                 mVoteAverageView.setText(getString(R.string.movie_detail_rating) + ": " + data.getFloat(MovieColumnIndex.COL_VOTE_AVERAGE));
                 mOverviewView.setText(data.getString(MovieColumnIndex.COL_OVERVIEW));
 
-                // create an instance of Picasso using the context
-                Picasso p = Picasso.with(getActivity());
-
-                // debugging purpose
-                p.setLoggingEnabled(true);
+                mCollapsingToolbarLayout.setTitle(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
+                p.load(Utils.IMG_END_POINT + "w780" + data.getString(MovieColumnIndex.COL_BACKDROP_IMAGE_PATH))
+                        // if the image don't exist we use a default drawable
+                        //.error(R.drawable.poster_missing)
+                        // put the result image in poster ImageView
+                        .into(mToolbarImage);
 
                 // load the backdrop image
                 p.load(Utils.IMG_END_POINT + "w185" + data.getString(MovieColumnIndex.COL_POSTER_IMAGE_PATH))
@@ -257,15 +272,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .error(R.drawable.poster_missing)
                                 // put the result image in poster ImageView
                         .into(mPosterView);
+
+                mCvHeader.setVisibility(View.VISIBLE);
+                mCvOverview.setVisibility(View.VISIBLE);
             }
+
         } else if (loader.getId() == REVIEWS_LOADER) {
 
-            if (data != null && data.getCount() > 0) {
+            if (data != null && data.moveToFirst()) {
                 Log.d("FRAGMENT DETAIL", "reviews found");
 
                 mReviewsView.removeAllViews();
 
-                while (data.moveToNext()) {
+                do {
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.review, mReviewsView, false);
                     final ReviewViewHolder reviewViewHolder = new ReviewViewHolder(view);
                     reviewViewHolder.author.setText(data.getString(ReviewColumnIndex.COL_AUTHOR));
@@ -273,10 +292,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     view.setTag(reviewViewHolder);
                     mReviewsView.addView(view);
-                }
+                } while (data.moveToNext());
+
+                mCvReviews.setVisibility(View.VISIBLE);
 
             } else {
-                Log.d("FRAGMENT DETAIL", "reviews not found");
 
                 mService.movieReviews(mMovieId, new Callback<APIResult<Review>>() {
                     @Override
@@ -326,12 +346,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         } else if (loader.getId() == TRAILERS_LOADER) {
 
-            if (data != null && data.getCount() > 0) {
+            if (data != null && data.moveToFirst()) {
                 Log.d("FRAGMENT DETAIL", "trailers found");
 
                 mTrailersView.removeAllViews();
 
-                while (data.moveToNext()) {
+                do {
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.trailer, mTrailersView, false);
                     TrailerViewHolder trailerViewHolder = new TrailerViewHolder(view);
                     trailerViewHolder.name.setText(data.getString(TrailerColumnIndex.COL_NAME));
@@ -354,9 +374,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     view.setTag(trailerViewHolder);
 
                     mTrailersView.addView(view);
-                }
+                } while (data.moveToNext());
+
+                mCvTrailers.setVisibility(View.VISIBLE);
             } else {
-                Log.d("FRAGMENT DETAIL", "trailers not found");
 
                 mService.movieTrailers(mMovieId, new Callback<TrailerResult>() {
                     @Override
@@ -409,7 +430,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoaderReset(Loader<Cursor> loader) {
         if (loader.getId() == REVIEWS_LOADER)
             mReviewsView.removeAllViews();
-            //mReviewsAdapter.swapCursor(null);
         else if (loader.getId() == TRAILERS_LOADER)
             mTrailersView.removeAllViews();
     }

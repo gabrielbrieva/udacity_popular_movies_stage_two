@@ -29,5 +29,4 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'io.reactivex:rxjava:1.0.13'
     compile 'io.reactivex:rxandroid:0.25.0'
-    compile 'com.inthecheesefactory.thecheeselibrary:adjustable-imageview:1.0.0'
 }
