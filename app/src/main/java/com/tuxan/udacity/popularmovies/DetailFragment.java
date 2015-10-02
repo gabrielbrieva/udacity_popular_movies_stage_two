@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.Fragment;
@@ -24,12 +25,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import com.tuxan.udacity.popularmovies.data.MovieContract;
 import com.tuxan.udacity.popularmovies.model.APIResult;
 import com.tuxan.udacity.popularmovies.model.Review;
 import com.tuxan.udacity.popularmovies.model.Trailer;
 import com.tuxan.udacity.popularmovies.model.TrailerResult;
+import com.tuxan.udacity.popularmovies.picasso.PicassoBigCache;
 
 import java.util.Vector;
 
@@ -160,10 +164,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        p = Picasso.with(getActivity());
+        p = PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity());
 
         // debugging purpose
-        p.setLoggingEnabled(true);
+        //p.setLoggingEnabled(true);
+        p.setIndicatorsEnabled(true);
 
         Bundle arguments = getArguments();
         if (arguments != null) {
@@ -260,21 +265,34 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 mOverviewView.setText(data.getString(MovieColumnIndex.COL_OVERVIEW));
 
                 mCollapsingToolbarLayout.setTitle(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
+                // load the backdrop image
                 p.load(Utils.IMG_END_POINT + "w780" + data.getString(MovieColumnIndex.COL_BACKDROP_IMAGE_PATH))
-                        // if the image don't exist we use a default drawable
-                        //.error(R.drawable.poster_missing)
                         // put the result image in poster ImageView
                         .into(mToolbarImage);
 
-                // load the backdrop image
+                // load the poster image
                 p.load(Utils.IMG_END_POINT + "w185" + data.getString(MovieColumnIndex.COL_POSTER_IMAGE_PATH))
                         // if the image don't exist we use a default drawable
                         .error(R.drawable.poster_missing)
-                                // put the result image in poster ImageView
-                        .into(mPosterView);
+                        // put the result image in poster ImageView
+                        .into(mPosterView, new com.squareup.picasso.Callback() {
+                            @Override
+                            public void onSuccess() {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                                    getActivity().startPostponedEnterTransition();
+                            }
+
+                            @Override
+                            public void onError() {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                                    getActivity().startPostponedEnterTransition();
+                            }
+                        });
 
                 mCvHeader.setVisibility(View.VISIBLE);
                 mCvOverview.setVisibility(View.VISIBLE);
+
+
             }
 
         } else if (loader.getId() == REVIEWS_LOADER) {

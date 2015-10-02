@@ -3,6 +3,7 @@ package com.tuxan.udacity.popularmovies;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -20,7 +21,7 @@ import com.tuxan.udacity.popularmovies.data.MovieContract;
 /**
  * A fragment with a grid of poster movies.
  */
-public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class MoviesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
@@ -165,12 +166,34 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mAdapter.swapCursor(data);
 
-        if (mPosition != GridView.INVALID_POSITION)
+        if (mPosition != GridView.INVALID_POSITION) {
             mGVMovies.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (getString(R.string.pref_sort_key).equals(key)) {
+            getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
+        }
     }
 }
