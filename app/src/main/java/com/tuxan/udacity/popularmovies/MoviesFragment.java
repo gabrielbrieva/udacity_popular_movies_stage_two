@@ -3,7 +3,6 @@ package com.tuxan.udacity.popularmovies;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -26,18 +25,12 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     private final String LOG_TAG = MoviesFragment.class.getSimpleName();
 
     private static final String SELECTED_KEY = "SELECTED_POSITION";
-    private static final String GRID_SCROLL_KEY = "GRID_INDEX";
 
-    private String sortValue = null;
-    private int mScrollPosition = 0;
     private int mPosition = GridView.INVALID_POSITION;
 
     // Custom CursorAdapter to show each movies on a GridView
     private MoviesAdapter mAdapter;
     private GridView mGVMovies;
-
-    //private ProgressDialog mPDLoading;
-    //private LinearLayout mLLOffline;
 
     private static final int MOVIES_LOADER = 0;
 
@@ -60,7 +53,7 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         /**
          * DetailMovieCallback for when an item has been selected.
          */
-        public void onItemSelected(Uri detailUri, View sharedView);
+        void onItemSelected(Uri detailUri, View sharedView);
     }
 
     public MoviesFragment() {}
@@ -68,29 +61,11 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        /*if (mPDLoading == null)
-            mPDLoading = new ProgressDialog(getActivity(), ProgressDialog.STYLE_SPINNER);
-
-        mPDLoading.setIndeterminate(true);
-        mPDLoading.setMessage(getString(R.string.loading_message));
-
-        if (sortValue == null) {
-            // get the sort value from shared preferences
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            sortValue = prefs.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_value_popularity));
-        }*/
-
-        if (savedInstanceState != null && savedInstanceState.containsKey(GRID_SCROLL_KEY))
-            mScrollPosition = savedInstanceState.getInt(GRID_SCROLL_KEY);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        // getting an instance of offline message...
-        //mLLOffline = (LinearLayout) view.findViewById(R.id.llOffline);
 
         // creating a MovieAdapter
         mAdapter = new MoviesAdapter(getActivity(), null, 0);
@@ -107,7 +82,10 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
 
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
 
+                mPosition = position;
+
                 if (cursor != null) {
+
                     ((Callback) getActivity())
                             .onItemSelected(
                                     MovieContract.MovieEntry.buildMovieUri(cursor.getLong(COL_MOVIE_ID)),
@@ -115,7 +93,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
                             );
                 }
 
-                mPosition = position;
             }
         });
 
@@ -134,8 +111,6 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
         if (mPosition != GridView.INVALID_POSITION) {
             outState.putInt(SELECTED_KEY, mPosition);
         }
-        // saving scroll position
-        outState.putInt(GRID_SCROLL_KEY, mGVMovies.getFirstVisiblePosition());
 
         super.onSaveInstanceState(outState);
     }
@@ -179,20 +154,19 @@ public class MoviesFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onResume() {
         super.onResume();
-
         PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
         PreferenceManager.getDefaultSharedPreferences(getActivity()).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (getString(R.string.pref_sort_key).equals(key)) {
+            mPosition = 0;
             getLoaderManager().restartLoader(MOVIES_LOADER, null, this);
         }
     }

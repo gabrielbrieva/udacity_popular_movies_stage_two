@@ -11,10 +11,8 @@
         <item name="android:windowContentTransitions">true</item>
     </style>
 
-    <!-- Settings activity theme -->
-    <style name="SettingsTheme" parent="@android:style/Theme.Material.Light.DarkActionBar">
-        <item name="android:colorPrimary">@color/pm_primary</item>
-        <item name="android:colorPrimaryDark">@color/pm_primary_dark</item>
+    <style name="PopularMovieFab" parent="Widget.Design.FloatingActionButton">
+        <item name="android:layout_margin">16dp</item>
     </style>
 
 </resources>

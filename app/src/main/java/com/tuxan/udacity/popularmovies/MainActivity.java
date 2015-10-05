@@ -83,9 +83,8 @@ public class MainActivity extends AppCompatActivity implements MoviesFragment.Ca
         } else {
             Intent intent = new Intent(this, DetailActivity.class).setData(detailUri);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && shareView != null) {
                 // transition between two poster images
-
                 View view = shareView.findViewById(R.id.iv_movie_poster);
 
                 Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(

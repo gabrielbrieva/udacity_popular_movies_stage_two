@@ -202,24 +202,6 @@ public class MovieProvider extends ContentProvider{
                 returnUri = MovieContract.MovieEntry.buildMovieUri(id);
             else
                 throw new SQLException("Failed to insert row into " + uri);
-        /*} else if (match == TRAILER) {
-            long id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, values);
-
-            Log.d(LOG_TAG, "Insert Id result: " + id);
-
-            if (id > 0)
-                returnUri = MovieContract.TrailerEntry.buildTrailerUri(id);
-            else
-                throw new SQLException("Failed to insert row into " + uri);
-        } else if (match == REVIEW) {
-            long id = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, values);
-
-            Log.d(LOG_TAG, "Insert Id result: " + id);
-
-            if (id > 0)
-                returnUri = MovieContract.ReviewEntry.buildReviewUri(id);
-            else
-                throw new SQLException("Failed to insert row into " + uri);*/
         } else {
             throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -430,14 +412,6 @@ public class MovieProvider extends ContentProvider{
         }
 
         return super.bulkInsert(uri, values);
-    }
-
-    public int deleteByMoviesId(long[] moviesId) {
-        int rowsDeleted = 0;
-
-        // TODO delete old movie data
-
-        return rowsDeleted;
     }
 
     // You do not need to call this method. This is a method specifically to assist the testing

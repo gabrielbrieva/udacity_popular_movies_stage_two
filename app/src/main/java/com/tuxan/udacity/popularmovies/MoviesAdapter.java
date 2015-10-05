@@ -9,18 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
-import com.tuxan.udacity.popularmovies.MoviesFragment;
-import com.tuxan.udacity.popularmovies.R;
-import com.tuxan.udacity.popularmovies.Utils;
 import com.tuxan.udacity.popularmovies.picasso.PicassoBigCache;
 
 public class MoviesAdapter extends CursorAdapter {
 
     // default image size, all image result must have the same size
-    private static int DEFAULT_IMG_WIDTH = 342;
     private static String DEFAULT_IMAGE_SCALE = "w342";
 
     Picasso p;
@@ -40,10 +34,6 @@ public class MoviesAdapter extends CursorAdapter {
         super(context, c, flag);
 
         p = PicassoBigCache.INSTANCE.getPicassoBigCache(mContext);
-
-        // debugging purpose
-        //p.setLoggingEnabled(true);
-        p.setIndicatorsEnabled(true);
     }
 
     @Override

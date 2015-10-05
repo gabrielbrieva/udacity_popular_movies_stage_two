@@ -4,20 +4,27 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,8 +32,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 import com.tuxan.udacity.popularmovies.data.MovieContract;
 import com.tuxan.udacity.popularmovies.model.APIResult;
@@ -46,6 +51,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public static String DETAIL_URI_KEY = "DETAIL_URI_KEY";
     private Uri mUri;
     private long mMovieId;
+    private boolean mTwoPane;
     private TMDbServiceFactory.TMDbService mService;
 
     private static final int DETAIL_LOADER = 1;
@@ -108,6 +114,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         public static final int COL_SOURCE = 2;
         public static final int COL_NAME = 3;
     }
+
+    private Toolbar mToolbar;
+
+    private CoordinatorLayout mClContainer;
+
+    private ShareActionProvider mShareActionProvider;
+    private String shareContent = null;
+
     private CollapsingToolbarLayout mCollapsingToolbarLayout;
     private ImageView mToolbarImage;
 
@@ -117,12 +131,14 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private CardView mCvReviews;
 
     private ImageView mPosterView;
-    //private TextView mTitleView;
     private TextView mDateReleaseView;
     private TextView mVoteAverageView;
     private TextView mOverviewView;
     private LinearLayout mReviewsView;
     private LinearLayout mTrailersView;
+
+    private FloatingActionButton mBtFavoriteView;
+    private boolean mIsFavorite = false;
 
     private Picasso p;
 
@@ -150,8 +166,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-
     public DetailFragment() {
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -166,10 +182,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         p = PicassoBigCache.INSTANCE.getPicassoBigCache(getActivity());
 
-        // debugging purpose
-        //p.setLoggingEnabled(true);
-        p.setIndicatorsEnabled(true);
-
         Bundle arguments = getArguments();
         if (arguments != null) {
             mUri = arguments.getParcelable(DetailFragment.DETAIL_URI_KEY);
@@ -178,15 +190,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         View view = inflater.inflate(R.layout.fragment_detail, container, false);
 
+        mClContainer = (CoordinatorLayout) view.findViewById(R.id.clContainer);
+
         mCollapsingToolbarLayout = ((CollapsingToolbarLayout) view.findViewById(R.id.collapsingToolbarLayout));
         mToolbarImage = (ImageView) view.findViewById(R.id.ivBackdrop);
+
+        mTwoPane = getActivity().findViewById(R.id.main_fragment) != null;
+
+        if(!mTwoPane) {
+            mToolbar = (Toolbar) view.findViewById(R.id.toolbar);
+            ((AppCompatActivity) getActivity()).setSupportActionBar(mToolbar);
+            ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         mCvHeader = (CardView) view.findViewById(R.id.cvMovieHeader);
         mCvOverview = (CardView) view.findViewById(R.id.cvMovieOverview);
         mCvTrailers = (CardView) view.findViewById(R.id.cvMovieTrailers);
         mCvReviews = (CardView) view.findViewById(R.id.cvMovieReviews);
 
-        //mTitleView = (TextView) view.findViewById(R.id.tvOriginalTitle);
         mOverviewView = (TextView) view.findViewById(R.id.tvOverview);
         mDateReleaseView = (TextView) view.findViewById(R.id.tvDateRelease);
         mVoteAverageView = (TextView) view.findViewById(R.id.tvVoteAverage);
@@ -194,20 +215,75 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         mReviewsView = (LinearLayout) view.findViewById(R.id.llReviewContainer);
         mTrailersView = (LinearLayout) view.findViewById(R.id.llTrailerContainer);
 
+        mBtFavoriteView = (FloatingActionButton) view.findViewById(R.id.fabBtn);
+
+        mBtFavoriteView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                ContentValues favValues = new ContentValues();
+                favValues.put(MovieContract.MovieEntry.COLUMN_FAVORITE, (mIsFavorite ? 0 : 1));
+
+                int updateMovies = getActivity().getContentResolver().update(
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        favValues,
+                        MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID + " = ? ",
+                        new String[] { Long.toString(mMovieId) });
+
+                if (updateMovies > 0) {
+                    // toggle favorite
+                    mIsFavorite = !mIsFavorite;
+                }
+            }
+        });
+
         return view;
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.share, menu);
 
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // If onLoadFinished happens before this, we can go ahead and set the share intent now.
+        if (shareContent != null) {
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            getActivity().onBackPressed(); //Call the back button's method
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, shareContent);
+        return shareIntent;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+
+        postponeTransition();
+
         getLoaderManager().initLoader(DETAIL_LOADER, null, this);
         getLoaderManager().initLoader(REVIEWS_LOADER, null, this);
         getLoaderManager().initLoader(TRAILERS_LOADER, null, this);
+
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -250,6 +326,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         return null;
     }
 
+    private void postponeTransition() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            getActivity().postponeEnterTransition();
+    }
+
+    private void initTransition() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            getActivity().startPostponedEnterTransition();
+    }
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, final Cursor data) {
 
@@ -259,12 +345,29 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (loader.getId() == DETAIL_LOADER) {
 
             if (data != null && data.moveToFirst()) {
-                //mTitleView.setText(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
+
                 mDateReleaseView.setText(getString(R.string.movie_detail_release_date) + ": " + data.getString(MovieColumnIndex.COL_RELEASE_DATE));
-                mVoteAverageView.setText(getString(R.string.movie_detail_rating) + ": " + data.getFloat(MovieColumnIndex.COL_VOTE_AVERAGE));
+                mVoteAverageView.setText(data.getFloat(MovieColumnIndex.COL_VOTE_AVERAGE) + "/10");
                 mOverviewView.setText(data.getString(MovieColumnIndex.COL_OVERVIEW));
 
+                mIsFavorite = data.getInt(MovieColumnIndex.COL_FAVORITE) > 0;
+
+                if (mIsFavorite) {
+                    mBtFavoriteView.setImageResource(R.drawable.ic_favorite_white);
+                } else {
+                    mBtFavoriteView.setImageResource(R.drawable.ic_favorite_border_white);
+                }
+
                 mCollapsingToolbarLayout.setTitle(data.getString(MovieColumnIndex.COL_ORIGINAL_TITLE));
+
+                if(mTwoPane) {
+                    mCollapsingToolbarLayout.setCollapsedTitleTextAppearance(R.style.PopularMovieCollapsedAppBar);
+                }
+
+                mClContainer.setVisibility(View.VISIBLE);
+                mCvHeader.setVisibility(View.VISIBLE);
+                mCvOverview.setVisibility(View.VISIBLE);
+
                 // load the backdrop image
                 p.load(Utils.IMG_END_POINT + "w780" + data.getString(MovieColumnIndex.COL_BACKDROP_IMAGE_PATH))
                         // put the result image in poster ImageView
@@ -278,27 +381,19 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                         .into(mPosterView, new com.squareup.picasso.Callback() {
                             @Override
                             public void onSuccess() {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                                    getActivity().startPostponedEnterTransition();
+                                initTransition();
                             }
 
                             @Override
                             public void onError() {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                                    getActivity().startPostponedEnterTransition();
+                                initTransition();
                             }
                         });
-
-                mCvHeader.setVisibility(View.VISIBLE);
-                mCvOverview.setVisibility(View.VISIBLE);
-
-
             }
 
         } else if (loader.getId() == REVIEWS_LOADER) {
 
             if (data != null && data.moveToFirst()) {
-                Log.d("FRAGMENT DETAIL", "reviews found");
 
                 mReviewsView.removeAllViews();
 
@@ -314,16 +409,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                 mCvReviews.setVisibility(View.VISIBLE);
 
-            } else {
+            } else if (Utils.isNetworkConnected(getActivity())) {
 
                 mService.movieReviews(mMovieId, new Callback<APIResult<Review>>() {
                     @Override
                     public void success(final APIResult<Review> result, Response response) {
 
                         if (result != null && result.results.size() > 0) {
-
-                            /*if (mReviewTask != null && mReviewTask.getStatus() == AsyncTask.Status.RUNNING)
-                                mReviewTask.cancel(true);*/
 
                             new AsyncTask<Void, Void, Void>() {
                                 @Override
@@ -357,7 +449,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     @Override
                     public void failure(RetrofitError error) {
-                        Log.d("FRAGMENT DETAIL", "error during review API Request: " + error.getMessage());
                     }
                 });
             }
@@ -365,18 +456,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         } else if (loader.getId() == TRAILERS_LOADER) {
 
             if (data != null && data.moveToFirst()) {
-                Log.d("FRAGMENT DETAIL", "trailers found");
 
                 mTrailersView.removeAllViews();
 
                 do {
+                    if (shareContent == null)
+                        shareContent = Utils.YOUTUBE_VIDEO_END_POINT + data.getString(TrailerColumnIndex.COL_SOURCE);
+
+                    if (mShareActionProvider != null) {
+                        mShareActionProvider.setShareIntent(createShareForecastIntent());
+                    }
+
                     View view = LayoutInflater.from(getActivity()).inflate(R.layout.trailer, mTrailersView, false);
                     TrailerViewHolder trailerViewHolder = new TrailerViewHolder(view);
                     trailerViewHolder.name.setText(data.getString(TrailerColumnIndex.COL_NAME));
 
                     p.load(Utils.YOUTUBE_IMAGE_END_POINT + data.getString(TrailerColumnIndex.COL_SOURCE) + "/default.jpg")
-                            .error(R.drawable.poster_missing) // if the image don't exist we use a default drawable
-                            .placeholder(R.drawable.poster_missing)
+                            .error(R.drawable.movie_missing) // if the image don't exist we use a default drawable
+                            .placeholder(R.drawable.movie_missing)
                             .into(trailerViewHolder.image); // put the result image in ImageView
 
                     trailerViewHolder.button.setOnClickListener(new View.OnClickListener() {
@@ -395,7 +492,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 } while (data.moveToNext());
 
                 mCvTrailers.setVisibility(View.VISIBLE);
-            } else {
+            } else if (Utils.isNetworkConnected(getActivity())){
 
                 mService.movieTrailers(mMovieId, new Callback<TrailerResult>() {
                     @Override
@@ -435,7 +532,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                     @Override
                     public void failure(RetrofitError error) {
-                        Log.d("FRAGMENT DETAIL", "error during trailer API Request: " + error.getMessage());
                     }
                 });
 

@@ -11,6 +11,7 @@ import android.content.SyncRequest;
 import android.content.SyncResult;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.tuxan.udacity.popularmovies.R;
@@ -61,7 +62,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
             final List<Movie> movies = new ArrayList<>();
 
-            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_POPULARITY);
+            Log.d(LOG_TAG, "Requesting to TMDb API using " + MovieProvider.FILTER_BY_POPULARITY);
 
             final TMDbServiceFactory.TMDbService service = TMDbServiceFactory.createService(getContext().getString(R.string.api_key));
 
@@ -72,7 +73,7 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                             if (discover != null && discover.results != null && !discover.results.isEmpty())
                                 movies.addAll(discover.results);
 
-                            Log.d(LOG_TAG, "**** Requesting to TMDb API using " + MovieProvider.FILTER_BY_VOTEAVERAGE);
+                            Log.d(LOG_TAG, "Requesting to TMDb API using " + MovieProvider.FILTER_BY_VOTEAVERAGE);
                             service.discover(MovieProvider.FILTER_BY_VOTEAVERAGE, new Callback<APIResult<Movie>>() {
                                 @Override
                                 public void success(APIResult<Movie> discover, Response resp) {
@@ -103,11 +104,14 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
         if (movies != null && !movies.isEmpty()) {
 
-            Log.d(LOG_TAG, "**** Movies to sync size: " + movies.size());
+            Log.d(LOG_TAG, "Movies to sync size: " + movies.size());
 
             Vector<ContentValues> vMovies = new Vector<>(movies.size());
+            List<String> moviesId = new ArrayList<>();
 
             for (Movie m : movies) {
+                moviesId.add(Long.toString(m.getId()));
+
                 ContentValues values = new ContentValues();
 
                 values.put(MovieContract.MovieEntry._ID, m.getId());
@@ -125,17 +129,29 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 vMovies.add(values);
             }
 
+            int insertOrUpdatedRowMovies = 0;
+
             if (vMovies.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[vMovies.size()];
                 vMovies.toArray(cvArray);
 
-                Log.d(LOG_TAG, "**** Bulk insert of results Movies...");
+                Log.d(LOG_TAG, "Bulk insert of results Movies...");
 
                 // the bulkInsert method update a row if already exist
-                mContentResolver.bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+                insertOrUpdatedRowMovies = mContentResolver.bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+
             }
 
-            // TODO: Delete old movies, reviews and trailers
+            if (insertOrUpdatedRowMovies > 0) {
+                // Delete old movies, reviews and trailers using cascade
+                int deletedRows = mContentResolver.delete(
+                        MovieContract.MovieEntry.CONTENT_URI,
+                        MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID + " NOT IN ( " + TextUtils.join(",", moviesId) + " ) ",
+                        null);
+
+                Log.d(LOG_TAG, "Deleted old movies: " + deletedRows);
+            }
+
         }
 
 
