@@ -146,7 +146,8 @@ public class PopularMoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 // Delete old movies, reviews and trailers using cascade
                 int deletedRows = mContentResolver.delete(
                         MovieContract.MovieEntry.CONTENT_URI,
-                        MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID + " NOT IN ( " + TextUtils.join(",", moviesId) + " ) ",
+                        MovieContract.MovieEntry.TABLE_NAME + "." + MovieContract.MovieEntry._ID + " NOT IN ( " + TextUtils.join(",", moviesId) + " ) " +
+                        " AND " + MovieContract.MovieEntry.COLUMN_FAVORITE + " = 0 ",
                         null);
 
                 Log.d(LOG_TAG, "Deleted old movies: " + deletedRows);

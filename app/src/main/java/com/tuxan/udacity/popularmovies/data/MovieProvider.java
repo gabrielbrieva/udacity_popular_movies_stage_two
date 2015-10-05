@@ -300,6 +300,9 @@ public class MovieProvider extends ContentProvider{
                         if (id != -1)
                             rowsInserted++;
                     } else {
+                        // we prevent to rewrite the favorite flag
+                        v.remove(MovieContract.MovieEntry.COLUMN_FAVORITE);
+
                         // if exist we update the row
                         id = db.update(MovieContract.MovieEntry.TABLE_NAME,
                                 v,
